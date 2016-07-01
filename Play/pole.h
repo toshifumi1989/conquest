@@ -8,6 +8,7 @@ class Pole : public GameObject
 {
 public:
 	Pole(glm::vec3 _pos, bool _onPlayer) :
+		maxHP(100),
 		HP(100),
 		radius(2),
 		height(20),
@@ -19,9 +20,11 @@ public:
 	}
 	~Pole(){}
 
+	void update();
 	void draw();
 
 	bool onPlayer;
+	float maxHP;
 	float HP;
 	float radius;
 	float height;

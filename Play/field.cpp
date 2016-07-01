@@ -139,13 +139,10 @@ void Field::draw()
 	glDisable(GL_DEPTH_TEST);
 }
 
-
-
-
 /////////////////////////////////
 //フィールドとの当たり判定
 /////////////////////////////////
-void Field::intersect(glm::vec3 _pos)
+float  Field::intersect(glm::vec3 _pos)
 {
 
 	glm::vec3 orig = glm::vec3(_pos.x, -1, _pos.z);//始点で、直線上の任意の点
@@ -169,10 +166,7 @@ void Field::intersect(glm::vec3 _pos)
 
 		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
 		{
-			if (_pos.y <= distance.x)
-			{
-				charcterHeight = distance.x;
-			}
+			return distance.x;
 		}
 	}
 	else
@@ -184,14 +178,57 @@ void Field::intersect(glm::vec3 _pos)
 
 		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
 		{
-			if (_pos.y <= distance.x)
-			{
-				charcterHeight = distance.x;
-			}
+			return distance.x;
 		}
 	}
 
 
 	glm::vec3 intersect = orig + dir * distance.x;
-	charcterHeight = intersect.y;
+	return intersect.y;
+}
+
+bool Field::hitBullet(glm::vec3 _pos)
+{
+	glm::vec3 orig = glm::vec3(_pos.x, -1, _pos.z);
+	glm::vec3 dir = glm::vec3(0, 1, 0);
+	glm::vec3 vert0;
+	glm::vec3 vert1;
+	glm::vec3 vert2;
+	glm::vec3 distance = glm::vec3(0, 0, 0);
+
+	int temporaryX = _pos.x;
+	int temporaryZ = _pos.z;
+	float nowPosY = _pos.y;
+
+	//上の三角
+	if ((_pos.x - temporaryX) + (_pos.z - temporaryZ) < 1)
+	{
+		vert0 = glm::vec3(temporaryX, field->vertex[(vtx * temporaryZ + temporaryX) * 3 + 1], temporaryZ);
+		vert1 = glm::vec3(temporaryX + 1, field->vertex[(vtx * temporaryZ + temporaryX + 1) * 3 + 1], temporaryZ);
+		vert2 = glm::vec3(temporaryX, field->vertex[((vtx * (temporaryZ + 1)) + temporaryX) * 3 + 1], temporaryZ + 1);
+
+		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
+		{
+			if (_pos.y <= distance.x)
+			{
+				return true;
+			}
+		}
+
+	}
+	else
+	{//下の三角
+
+		vert0 = glm::vec3(temporaryX + 1, field->vertex[(vtx * temporaryZ + temporaryX + 1) * 3 + 1], temporaryZ);
+		vert1 = glm::vec3(temporaryX, field->vertex[((vtx * (temporaryZ + 1)) + temporaryX) * 3 + 1], temporaryZ + 1);
+		vert2 = glm::vec3(temporaryX + 1, field->vertex[((vtx * (temporaryZ + 1)) + temporaryX + 1) * 3 + 1], temporaryZ + 1);
+
+		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
+		{
+			if (_pos.y <= distance.x)
+			{
+				return true;
+			}
+		}
+	}
 }

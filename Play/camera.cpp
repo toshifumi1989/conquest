@@ -16,8 +16,9 @@ void Camera::setUp(glm::vec3 _pos, glm::vec3 _target)
 void Camera::update()
 {
 	//ƒJƒƒ‰‚ÌˆÚ“®
+	const float cameraHeight = 2.0f;
 	pos.x = player->pos.x - sin(player->yaw * M_PI / 180) * distance;
-	pos.y = player->pos.y + 2;
+	pos.y = player->pos.y + cameraHeight;
 	pos.z = player->pos.z - cos(player->yaw * M_PI / 180) * distance;
 
 

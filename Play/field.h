@@ -9,8 +9,7 @@ class Field : public Texture
 public:
 	Field() :
 		vtx(256),
-		size(vtx),
-		charcterHeight(0)
+		size(vtx)
 	{
 		center = glm::vec3(size / 2,0,size / 2);	
 	}
@@ -18,8 +17,9 @@ public:
 
 	void setup(const char* _texture);	//描画準備
 	void draw();						//描画
-	void intersect(glm::vec3 _pos);		//当たり判定
-	float charcterHeight;				//当たり判定の数値の待機場所
+	float intersect(glm::vec3 _pos);	//当たり判定 y軸をとる（キャラクター
+	bool hitBullet(glm::vec3 _pos);		//当たり判定（バレット
+
 	glm::vec3 center;					//フィールドの中心座標
 
 private:

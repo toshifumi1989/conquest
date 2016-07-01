@@ -5,7 +5,8 @@
 #include <vector>
 #include "../glut.h"
 
-enum TEXTURE_ID {
+enum TEXTURE_ID 
+{
 	TITLE_BACKGROUND,
 	FIELD,
 	WALL,

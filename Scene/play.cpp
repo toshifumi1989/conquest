@@ -21,19 +21,19 @@ void Play::init()
 
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::WALL]);
 	Wall *northWall = new Wall(glm::vec3(field->center.x, 0, field->center.z + fieldToDistance), 0);	//z100‚Ì•Ç
-	northWall->read("tail.bmp");
+	northWall->read("wall.bmp");
 	wall.push_back(northWall);
 
 	Wall *southWall = new Wall(glm::vec3(field->center.x, 0, field->center.z - fieldToDistance), 0);	//z-100‚Ì•Ç
-	southWall->read("tail.bmp");
+	southWall->read("wall.bmp");
 	wall.push_back(southWall);
 
 	Wall *eastWall = new Wall(glm::vec3(field->center.x + fieldToDistance, 0, field->center.z), 90);		//x100‚Ì•Ç
-	eastWall->read("tail.bmp");
+	eastWall->read("wall.bmp");
 	wall.push_back(eastWall);
 
 	Wall *westWall = new Wall(glm::vec3(field->center.x - fieldToDistance, 0, field->center.z), 90);	//z-100‚Ì•Ç
-	westWall->read("tail.bmp");
+	westWall->read("wall.bmp");
 	wall.push_back(westWall);
 
 	//ƒ|[ƒ‹--------------------------------------------------------------------------------
@@ -74,6 +74,10 @@ void Play::update()
 	player->move();
 	player->update();
 
+	for (int i = 0; i < pole.size(); i++)
+	{
+		pole[i]->update();
+	}
 
 	camera->update();
 }
