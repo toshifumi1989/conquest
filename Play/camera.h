@@ -19,19 +19,13 @@ public:
 
 		pos(0, 0, 0),
 		target(0, 0, 0),
-		up(0, 1, 0),
-
-		distance(7.0f)
+		up(0, 1, 0)
 	{}
 
 	void setUp(glm::vec3 _pos, glm::vec3 _target);		//戦闘準備用
 	void update();		//カメラの更新
 	void draw();		//カメラの描画
 	void twoDimensionCamera();//２次元の描画
-
-	glm::vec3 pos;		//カメラの位置
-	glm::vec3 target;	//カメラの向き
-	float distance;		//プレイヤーとカメラの距離
 
 	float left;			//2Dの左側
 	float right;		//2Dの右側
@@ -40,6 +34,11 @@ public:
 
 
 private:
+	glm::vec3 pos;		//カメラの位置
+	glm::vec3 lastPos;	//前のフレームでの位置
+	glm::vec3 target;	//カメラの向き
+	glm::vec3 lastTarget;//前のフレームのカメラの向き
+
 	float angle;		//表示角度
 	float aspect;		//アスペクト
 	float nearDraw;		//どれくらい近くまで描画するか

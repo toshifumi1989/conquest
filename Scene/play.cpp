@@ -4,6 +4,7 @@
 #include "../Play/field.h"
 #include "../Play/wall.h"
 #include "../Play/player.h"
+#include "../Play/bullet.h"
 #include "../Play/pole.h"
 
 /////////////////////////
@@ -47,7 +48,7 @@ void Play::init()
 		}
 		for (int x = 0; x < poleNum; x++)
 		{
-			Pole *subPole = new Pole(glm::vec3(field->center.x + ( 40 * x - 60) , 0, field->center.z + (40 * y - 60)), type);
+			Pole *subPole = new Pole(glm::vec3(field->center.x + (40 * x - 60), 0, field->center.z + (40 * y - 60)), type);
 			pole.push_back(subPole);
 		}
 	}
@@ -60,8 +61,12 @@ void Play::init()
 
 	//カメラ------------------------------------------------------------------------------
 	camera = new Camera();
-	const float cameraHeight = 2.0f;
-	camera->setUp(glm::vec3(0, player->pos.y + cameraHeight, camera->distance), player->pos);
+	const float posHeight = 2.0f;	//カメラ高さ
+	const float distance = 7.0f;	//プレイヤーとの距離
+	const float targetHeight = 1.0f;//ターゲット位置
+	camera->setUp(
+		player->pos + glm::vec3(0, posHeight, distance),	//カメラの初期位置
+		player->pos + glm::vec3(0, targetHeight,0));		//ターゲット位置
 
 }
 
@@ -71,14 +76,34 @@ void Play::init()
 /////////////////////////
 void Play::update()
 {
+	//プレイヤー--------------------------
 	player->move();
+	player->attack();
 	player->update();
 
+	//弾----------------------------------
+	std::list< Bullet* >::iterator bulletIter = playerBullet.begin();
+	while (bulletIter != playerBullet.end())
+	{
+		(*bulletIter)->update();	//移動更新
+		(*bulletIter)->exist();		//存在確認
+
+		//もう弾が存在しないとき消去
+		if (!(*bulletIter)->onExistFlag)
+		{
+			bulletIter = playerBullet.erase(bulletIter);
+			return;
+		}
+		bulletIter++;
+	}
+
+	//円柱---------------------------------
 	for (int i = 0; i < pole.size(); i++)
 	{
 		pole[i]->update();
 	}
 
+	//カメラ---------------------------------
 	camera->update();
 }
 
@@ -92,23 +117,38 @@ void Play::draw()
 	glColor3f(1, 1, 1);		//色の初期化
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+	//カメラ設定--------------------------------------
 	camera->draw();
 
-	field->draw();
 
+	//プレイヤー--------------------------------------
 	player->draw();
 
+	//弾----------------------------------------------
+	std::list< Bullet* >::iterator bulletIter = playerBullet.begin();
+	while (bulletIter != playerBullet.end())
+	{
+		(*bulletIter)->draw();
+		bulletIter++;
+	}
+
+	printf("size = %d\n", playerBullet.size());
+
+	//フィールド（地面描画--------------------------
+	field->draw();
+
+	//壁描画----------------------------------------
 	for (int i = 0; i < wall.size(); i++)
 	{
 		wall[i]->draw();
 	}
 
-
+	//円柱------------------------------------------
 	for (int i = 0; i < pole.size(); i++)
 	{
 		pole[i]->draw();
 	}
+
 
 }
 

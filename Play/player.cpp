@@ -1,7 +1,8 @@
 #define _USE_MATH_DEFINES
 
-#include "player.h"
 #include <math.h>
+#include "player.h"
+#include "bullet.h"
 #include "field.h"
 
 Player *player;
@@ -45,7 +46,15 @@ void Player::move()
 
 void Player::attack()
 {
+	static bool presSpace = 0;
 
+	if (keys[' '] && presSpace == false)
+	{
+		Bullet *bullet = new Bullet(pos, yaw);
+		playerBullet.push_back(bullet);
+	}
+
+	presSpace = keys[' '];
 }
 
 void Player::draw()

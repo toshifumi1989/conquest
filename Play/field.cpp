@@ -231,4 +231,6 @@ bool Field::hitBullet(glm::vec3 _pos)
 			}
 		}
 	}
+
+	return false;
 }
