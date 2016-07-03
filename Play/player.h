@@ -15,13 +15,13 @@ public:
 		color(0.2f, 0.4f, 0.7f)
 	{
 		pos = _pos;
+		lastPos = _pos;
 		size = _size;
 		yaw = _yaw;
 	}
 	~Player(){}
 
 	glm::vec3 color;		//キャラクターの色
-
 
 	void update();					//更新
 	void move();					//キャラクター移動

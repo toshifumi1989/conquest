@@ -4,6 +4,7 @@
 #include "../Play/field.h"
 #include "../Play/wall.h"
 #include "../Play/player.h"
+#include "../Play/enemy.h"
 #include "../Play/bullet.h"
 #include "../Play/pole.h"
 
@@ -54,10 +55,12 @@ void Play::init()
 	}
 
 
-
-
 	//プレイヤー--------------------------------------------------------------------------
 	player = new Player(glm::vec3(field->center.x, 4, field->center.z - 100), 0.5f, 0);
+
+	//エネミー---------------------------------------------------------------------------
+	Enemy* subEnemy = new Enemy(field->center + glm::vec3(0, 4, 100), 0.5f, 180);
+	enemy.push_back(subEnemy);
 
 	//カメラ------------------------------------------------------------------------------
 	camera = new Camera();
@@ -80,6 +83,14 @@ void Play::update()
 	player->move();
 	player->attack();
 	player->update();
+
+	//エネミー-----------------------------
+	std::list< Enemy* >::iterator enemyIter = enemy.begin();
+	while (enemyIter != enemy.end())
+	{
+		(*enemyIter)->update();
+		enemyIter++;
+	}
 
 	//弾----------------------------------
 	std::list< Bullet* >::iterator bulletIter = playerBullet.begin();
@@ -133,6 +144,14 @@ void Play::draw()
 	}
 
 	printf("size = %d\n", playerBullet.size());
+
+	//エネミー-------------------------------------------
+	std::list< Enemy* >::iterator enemyIter = enemy.begin();
+	while (enemyIter != enemy.end())
+	{
+		(*enemyIter)->draw();
+		enemyIter++;
+	}
 
 	//フィールド（地面描画--------------------------
 	field->draw();
