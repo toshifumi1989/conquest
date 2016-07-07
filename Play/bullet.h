@@ -9,7 +9,7 @@
 
 class Bullet :public GameObject {
 public:
-	Bullet(glm::vec3 _pos,float _yaw,bool _onPlayer) :
+	Bullet(glm::vec3 _pos,float _yaw,unsigned int _type) :
 		onExistFlag(true),
 		onCount(0)
 	{
@@ -20,14 +20,18 @@ public:
 		speed.x += sin(yaw * M_PI / 180) * bulletSpeed;
 		speed.z += cos(yaw * M_PI / 180) * bulletSpeed;
 
-		onPlayer = _onPlayer;
-		if (_onPlayer)
+		type = _type;
+		if (_type == TYPE::BLUE)
 		{
 			damageSize = 100;
 		}
-		else
+		else if(_type == TYPE::RED)
 		{
 			damageSize = -100;
+		}
+		else
+		{
+			damageSize = 0;
 		}
 	}
 	~Bullet() {}
@@ -43,7 +47,7 @@ public:
 private:
 	unsigned char onCount;			//残りの生存カウント
 	char damageSize;				//ダメージ量
-	bool onPlayer;					//true:プレイヤーの弾 false:エネミーの弾
+	unsigned int type;				//所属陣営
 
 
 };

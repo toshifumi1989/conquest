@@ -6,6 +6,7 @@
 #include "field.h"
 
 Player *player;
+Player *NPC;
 extern bool keys[256];
 
 void Player::update()
@@ -83,7 +84,7 @@ void Player::attack()
 
 	if (keys[' '] && presSpace == false)
 	{
-		Bullet *bullet = new Bullet(pos + glm::vec3(0,adjustBody,0), yaw,true);
+		Bullet *bullet = new Bullet(pos + glm::vec3(0,adjustBody,0), yaw,type);
 		playerBullet.push_back(bullet);
 	}
 

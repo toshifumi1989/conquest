@@ -57,8 +57,7 @@ bool Bullet::hitPole()
 		if (bulletToPole <= hitDistance)
 		{
 			//“¯‚¶w‰c‚Ìƒ|[ƒ‹‚É“–‚½‚Á‚Ä‚à”½‰ž‚µ‚È‚¢
-			if(!((onPlayer && pole[i]->type == TYPE::PLAYER) ||
-				(!onPlayer && pole[i]->type == TYPE::ENEMY)))
+			if(!(type == pole[i]->type))
 			pole[i]->HP += damageSize;
 			return true;
 		}

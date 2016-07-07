@@ -4,13 +4,6 @@
 #include <vector>
 #include "gameObject.h"
 
-enum TYPE
-{
-	NEUTRAL,
-	PLAYER,
-	ENEMY,
-};
-
 class Pole : public GameObject
 {
 public:
@@ -28,7 +21,7 @@ public:
 		{
 			HP = maxHP / 2;
 		}
-		else if (_type == TYPE::PLAYER)
+		else if (_type == TYPE::BLUE)
 		{
 			HP = maxHP;
 		}
@@ -46,7 +39,7 @@ public:
 
 
 	int HP;					//円柱の陣営ゲージ
-	unsigned int type;		//0:中立 1:プレイヤー側 2:エネミー側
+	unsigned int type;		//所属陣営
 
 private:
 	const int maxHP;				//最大耐久値

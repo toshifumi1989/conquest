@@ -1,6 +1,7 @@
 #include "wall.h"
 #include "field.h"
 #include "camera.h"
+
 std::vector< Wall* >wall;
 
 //////////////////////////////////////////

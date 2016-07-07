@@ -4,7 +4,7 @@
 #include "../Play/field.h"
 #include "../Play/wall.h"
 #include "../Play/player.h"
-#include "../Play/enemy.h"
+#include "../Play/npc.h"
 #include "../Play/bullet.h"
 #include "../Play/pole.h"
 
@@ -48,7 +48,7 @@ void Play::init()
 	{
 		if (y == 0)
 		{//プレイヤー側
-			type = TYPE::PLAYER;
+			type = TYPE::BLUE;
 		}
 		else if (y == 1)
 		{//真ん中
@@ -56,7 +56,7 @@ void Play::init()
 		}
 		else
 		{//エネミー	側
-			type = TYPE::ENEMY;
+			type = TYPE::RED;
 		}
 		for (int x = 0; x < poleNum; x++)
 		{
@@ -67,15 +67,27 @@ void Play::init()
 
 
 	//プレイヤー--------------------------------------------------------------------------
-	glm::vec3 centerToPlayer(0, 4, -100);	//フィールド中心からの位置
-	float playerSize = 0.5f;				//プレイヤーの大きさ
-	player = new Player(field->center + centerToPlayer, playerSize, 0);
+	glm::vec3 centerToPlayer(-30, 4, -100);		//フィールド中心からの位置
+	float playerSize = 0.5f;					//プレイヤーの大きさ
+	player = new Player(field->center + centerToPlayer, playerSize, 0 ,TYPE::BLUE);
+
+	//サポーター
+	glm::vec3 centerToSupporter(30, 4, -100);	//フィールド中心からの位置
+	float supporterSize = 0.5f;
+	NPC* subSuppoter = new NPC(field->center + centerToSupporter, supporterSize, 0, TYPE::BLUE);
+	supporter.push_back(subSuppoter);
 
 	//エネミー---------------------------------------------------------------------------
-	glm::vec3 centerToEnemy(30, 4, 100);		//フィールド中心からの位置
-	float enemySize = 0.5f;					//エネミーの大きさ
-	Enemy* subEnemy = new Enemy(field->center + centerToEnemy, enemySize, 180);
-	enemy.push_back(subEnemy);
+	//1人目
+	glm::vec3 centerToEnemy1(30, 4, 100);		//1人目のフィールド中心からの位置
+	float enemySize = 0.5f;						//エネミーの大きさ
+	NPC* subEnemy1 = new NPC(field->center + centerToEnemy1, enemySize, 180,TYPE::RED);
+	enemy.push_back(subEnemy1);
+
+	//2人目
+	glm::vec3 centerToEnemy2(-30, 4, 100);		//2人目のフィールド中心からの位置
+	NPC* subEnemy2 = new NPC(field->center + centerToEnemy2, enemySize, 180, TYPE::RED);
+	enemy.push_back(subEnemy2);
 
 	//カメラ------------------------------------------------------------------------------
 	camera = new Camera();
@@ -95,13 +107,23 @@ void Play::init()
 /////////////////////////
 void Play::update()
 {
-	//プレイヤー--------------------------
+	//キャラクター--------------------------------------
+	//プレイヤー
 	player->move();
 	player->attack();
 	player->update();
 
-	//エネミー-----------------------------
-	std::list< Enemy* >::iterator enemyIter = enemy.begin();
+	//サポーター
+	std::list< NPC* >::iterator supporterIter = supporter.begin();
+	while (supporterIter != supporter.end())
+	{
+		(*supporterIter)->action();
+		(*supporterIter)->update();
+		supporterIter++;
+	}
+
+	//エネミー
+	std::list< NPC* >::iterator enemyIter = enemy.begin();
 	while (enemyIter != enemy.end())
 	{
 		(*enemyIter)->action();
@@ -109,8 +131,8 @@ void Play::update()
 		enemyIter++;
 	}
 
-	//弾----------------------------------
-	//プレイヤー
+	//弾---------------------------------------------
+	//blue
 	std::list< Bullet* >::iterator pbulletIter = playerBullet.begin();
 	while (pbulletIter != playerBullet.end())
 	{
@@ -126,7 +148,7 @@ void Play::update()
 		pbulletIter++;
 	}
 
-	//エネミー
+	//red
 	std::list< Bullet* >::iterator ebulletIter = enemyBullet.begin();
 	while (ebulletIter != enemyBullet.end())
 	{
@@ -169,15 +191,23 @@ void Play::draw()
 	//プレイヤー
 	player->draw();
 
+	//サポーター
+	std::list< NPC* >::iterator supporterIter = supporter.begin();
+	while (supporterIter != supporter.end())
+	{
+		(*supporterIter)->draw();
+		supporterIter++;
+	}
+
 	//エネミー
-	std::list< Enemy* >::iterator enemyIter = enemy.begin();
+	std::list< NPC* >::iterator enemyIter = enemy.begin();
 	while (enemyIter != enemy.end())
 	{
 		(*enemyIter)->draw();
 		enemyIter++;
 	}
 	//弾----------------------------------------------
-	//プレイヤー
+	//blue
 	std::list< Bullet* >::iterator pbulletIter = playerBullet.begin();
 	while (pbulletIter != playerBullet.end())
 	{
@@ -185,7 +215,7 @@ void Play::draw()
 		pbulletIter++;
 	}
 
-	//エネミー
+	//red
 	std::list< Bullet* >::iterator ebulletIter = enemyBullet.begin();
 	while (ebulletIter != enemyBullet.end())
 	{

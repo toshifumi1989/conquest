@@ -1,7 +1,6 @@
 #include "pole.h"
 #include "../glut.h"
 #include "player.h"
-#include "enemy.h"
 
 std::vector< Pole* >pole;
 
@@ -12,7 +11,7 @@ void Pole::recovery()
 {
 	//自陣のとき自動回復
 	const int recovery = 1;
-	if (type == TYPE::PLAYER)
+	if (type == TYPE::BLUE)
 	{
 		//プレイヤー側のときの自動回復
 		//プレイヤー側のときの最大値はmaxHP
@@ -28,7 +27,7 @@ void Pole::recovery()
 		}
 
 	}
-	else if (type == TYPE::ENEMY)
+	else if (type == TYPE::RED)
 	{
 		//エネミー側のときの自動回復
 		//エネミー側のときの最大値は0
@@ -53,14 +52,14 @@ void Pole::occupation()
 {
 	if (HP >= maxHP)
 	{
-		type = TYPE::PLAYER;
+		type = TYPE::BLUE;
 
 	}
 
 
 	if (HP <= 0)
 	{
-		type = TYPE::ENEMY;
+		type = TYPE::RED;
 
 	}
 
@@ -75,16 +74,17 @@ void Pole::draw()
 	glPushMatrix();
 	{
 		glEnable(GL_DEPTH_TEST);
-
+		const glm::vec3 blueColor(0.2f, 0.4f, 0.7f);	//BLUE陣営の色
+		const glm::vec3 redColor(0.7f, 0.2f, 0.1f);		//RED陣営の色
 
 		//円柱---------------------------------------------------
-		if (type == TYPE::PLAYER)
+		if (type == TYPE::BLUE)
 		{
-			color = player->color;
+			color = blueColor;
 		}
-		else if (type == TYPE::ENEMY)
+		else if (type == TYPE::RED)
 		{
-			color = glm::vec3(0.7f, 0.2f, 0.1f);
+			color = redColor;
 		}
 		else
 		{
@@ -95,11 +95,11 @@ void Pole::draw()
 		glTranslatef(pos.x, pos.y, pos.z);
 
 		glPushMatrix();
-		glRotatef(-90, 1, 0, 0);//向きを立てる
-		GLUquadricObj *quad = gluNewQuadric();//quadric object を一つ生成する 
+		glRotatef(-90, 1, 0, 0);							//向きを立てる
+		GLUquadricObj *quad = gluNewQuadric();				//quadric object を一つ生成する 
 		gluCylinder(quad, radius, radius, height, sides, 1);//円柱
 		glPopMatrix();
-		
+
 		//ビルボード行列設定--------
 		glm::mat4 view;
 		glGetFloatv(GL_MODELVIEW_MATRIX, (float*)&view);
@@ -114,20 +114,19 @@ void Pole::draw()
 		const float playerPole = HP / 50.f;			//player側の部分
 		const float maxShow = maxHP / 50.f;			//HPバーの横の長さ
 		const float posHeight = 10.0f;				//HPバーの高さ
-		const glm::vec3 enemyColor(0.7f, 0.2f, 0.1f);//敵の色
 
 		glTranslatef(-maxShow / 2, posHeight, 0);
 		glBegin(GL_QUADS);
 		{
 			//プレイヤー側のHP
-			glColor3f(player->color.r, player->color.g, player->color.b);
+			glColor3f(blueColor.r, blueColor.g, blueColor.b);
 			glVertex3f(0, 0, 0);
 			glVertex3f(0, height, 0);
 			glVertex3f(playerPole, height, 0);
 			glVertex3f(playerPole, 0, 0);
 
 			//エネミー側のHP
-			glColor3f(enemyColor.r, enemyColor.g, enemyColor.b);
+			glColor3f(redColor.r, redColor.g, redColor.b);
 			glVertex3f(playerPole, 0, 0);
 			glVertex3f(playerPole, height, 0);
 			glVertex3f(maxShow, height, 0);
