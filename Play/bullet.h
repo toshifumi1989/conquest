@@ -5,13 +5,14 @@
 
 #include <math.h>
 #include <list>
+#include "npc.h"
 #include "gameObject.h"
 
 class Bullet :public GameObject {
 public:
-	Bullet(glm::vec3 _pos,float _yaw,unsigned int _type) :
+	Bullet(glm::vec3 _pos,float _yaw,unsigned int _type,int _damage) :
 		onExistFlag(true),
-		onCount(0)
+		onCount(20)
 	{
 		const float bulletSpeed = 2.0f;
 		
@@ -21,23 +22,13 @@ public:
 		speed.z += cos(yaw * M_PI / 180) * bulletSpeed;
 
 		type = _type;
-		if (_type == TYPE::BLUE)
-		{
-			damageSize = 100;
-		}
-		else if(_type == TYPE::RED)
-		{
-			damageSize = -100;
-		}
-		else
-		{
-			damageSize = 0;
-		}
+		damageSize = _damage;
 	}
 	~Bullet() {}
 
 	void draw();
 	void update();
+	bool hitCharacter(std::list< NPC* > _character);
 	bool hitPole();
 	bool outField();
 	void exist();
@@ -46,7 +37,7 @@ public:
 
 private:
 	unsigned char onCount;			//残りの生存カウント
-	char damageSize;				//ダメージ量
+	unsigned int damageSize;				//ダメージ量
 	unsigned int type;				//所属陣営
 
 

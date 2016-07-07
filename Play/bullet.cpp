@@ -1,4 +1,5 @@
 #include "bullet.h"
+#include "player.h"
 #include "field.h"
 #include "pole.h"
 #include "../glut.h"
@@ -15,7 +16,7 @@ void Bullet::update()
 {
 
 	pos += speed;	//移動
-	//onCount++;
+	onCount--;
 	
 }
 
@@ -38,11 +39,40 @@ void Bullet::draw()
 	glDisable(GL_DEPTH_TEST);
 }
 
+////////////////////////////////////////
+//キャラクターとの当たり判定
+////////////////////////////////////////
+bool Bullet::hitCharacter(std::list< NPC* > _character)
+{
+	//あたり判定の距離
+	const float hitDistance = 2.f;
+
+	std::list< NPC* >::iterator iter = _character.begin();
+	while (iter != _character.end())
+	{
+		//弾とキャラクターの距離
+		const float distance =
+			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
+			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
+
+		if (distance <= hitDistance)
+		{
+			//当たったとき
+			(*iter)->HP -= damageSize;
+
+			return true;
+		}
+	}
+	//当たっていないときはfalse
+	return false;
+}
+
 /////////////////////////////////////////
 //円柱とのあたり判定
 /////////////////////////////////////////
 bool Bullet::hitPole()
 {
+	//あたり判定の距離
 	const float hitDistance = 4.5f;
 
 	//円柱の数だけ確認する
@@ -57,8 +87,17 @@ bool Bullet::hitPole()
 		if (bulletToPole <= hitDistance)
 		{
 			//同じ陣営のポールに当たっても反応しない
-			if(!(type == pole[i]->type))
-			pole[i]->HP += damageSize;
+			if (!(type == pole[i]->type))
+			{
+				if (type == TYPE::BLUE)
+				{
+ 					pole[i]->HP += damageSize;
+				}
+				else
+				{
+					pole[i]->HP -= damageSize;
+				}
+			}
 			return true;
 		}
 	}
@@ -66,7 +105,6 @@ bool Bullet::hitPole()
 	//あたっていないときはfalse
 	return false;
 }
-
 
 
 ///////////////////////////////////
@@ -84,11 +122,19 @@ bool Bullet::outField()
 	return false;
 }
 
+
 //////////////////////////////////
 //弾が存在しているか
 /////////////////////////////////
 void Bullet::exist()
 {
+	//残りカウントの生存確認
+	if (onCount <= 0)
+	{
+		onExistFlag = false;
+	}
+
+	//当たり判定での存在確認
 	if (
 		hitPole() ||				//円柱にあたっているか
 		field->hitBullet(pos) ||	//フィールドにあたっているか

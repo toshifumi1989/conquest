@@ -8,6 +8,7 @@ class NPC :public GameObject
 {
 public:
 	NPC(glm::vec3 _pos, float _size, float _yaw,unsigned char _type) :
+		HP(500),
 		attackCount(120)
 	{
 		pos = _pos;
@@ -35,6 +36,7 @@ public:
 	void update();				//毎フレーム更新
 	void draw();				//描画
 	void action();				//行動（移動、攻撃
+	int HP;						//耐久値
 
 private:
 	void move(float _distance, unsigned int _onAttack);		//移動

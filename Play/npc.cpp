@@ -59,7 +59,8 @@ void NPC::action()
 		(pos.x - targetPos.x) * (pos.x - targetPos.x)
 		+ (pos.z - targetPos.z) * (pos.z - targetPos.z);
 
-	const unsigned int onAttack = 50;	//UŒ‚‰Â”\‹——£
+	//UŒ‚‰Â”\‹——£
+	const unsigned int onAttack = 30;	
 
 	yaw = atan2(targetPos.x - pos.x, targetPos.z - pos.z) * 180 / M_PI;
 
@@ -91,15 +92,15 @@ void NPC::move(float _distance, unsigned int _onAttack)
 //////////////////////////////
 void NPC::attack(float _distance, unsigned int _onAttack)
 {
-	printf("%d\n", attackCount);
+	unsigned int damage = 200;
 
 	//0ˆÈ‰º‚ÌAUŒ‚‚ª‚Å‚«‚é
 	if (attackCount <= 0)
 	{
 		//UŒ‚‰Â”\‹——£‚Ì“à‚É“G‚ª‚¢‚½ê‡UŒ‚‚·‚é
 		if (_distance < _onAttack * _onAttack)
-		{
-			Bullet* subBullet = new Bullet(pos, yaw, type);
+		{	
+			Bullet* subBullet = new Bullet(pos, yaw, type, damage);
 			enemyBullet.push_back(subBullet);
 
 			attackCount = 60;//UŒ‚ŠÔŠu‚Ì‰Šú‰»

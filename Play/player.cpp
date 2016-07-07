@@ -9,6 +9,9 @@ Player *player;
 Player *NPC;
 extern bool keys[256];
 
+///////////////////////////////////
+//更新
+///////////////////////////////////
 void Player::update()
 {
 	speed *= 0.9;	//減速
@@ -33,6 +36,9 @@ void Player::update()
 	lastPos = pos;	//位置の保存
 }
 
+///////////////////////////////////
+//移動
+///////////////////////////////////
 void Player::move()
 {
 
@@ -77,20 +83,28 @@ void Player::move()
 
 }
 
+//////////////////////////////////
+//攻撃
+//////////////////////////////////
 void Player::attack()
 {
 	static bool presSpace = 0;			//前のフレームでもスペースがtrueだったか確認
 	const float adjustBody = size / 2;	//体のサイズのための位置調整
+	unsigned int damage = 100;					//ダメージ
+
 
 	if (keys[' '] && presSpace == false)
 	{
-		Bullet *bullet = new Bullet(pos + glm::vec3(0,adjustBody,0), yaw,type);
+		Bullet *bullet = new Bullet(pos + glm::vec3(0,adjustBody,0), yaw,type, damage);
 		playerBullet.push_back(bullet);
 	}
 
 	presSpace = keys[' '];
 }
 
+///////////////////////////////////
+//描画
+///////////////////////////////////
 void Player::draw()
 {
 	const float adjustBody = size / 2;	//体のサイズのための位置調整

@@ -30,15 +30,15 @@ void Pole::recovery()
 	else if (type == TYPE::RED)
 	{
 		//エネミー側のときの自動回復
-		//エネミー側のときの最大値は0
-		if (HP > 0)	//HPが0より大きいとき
+		//エネミー側のときの最大値は -maxHP
+		if (HP > -maxHP)	//HPが-maxHPより大きいとき
 		{
 			HP -= recovery;
 		}
-		//HPが0を超えたときHPを0にする
-		if (HP <= 0)
+		//HPが0を超えたときHPを-maxHPにする
+		if (HP <= -maxHP)
 		{
-			HP = 0;
+			HP = -maxHP;
 		}
 	}
 
@@ -57,7 +57,7 @@ void Pole::occupation()
 	}
 
 
-	if (HP <= 0)
+	if (HP <= -maxHP)
 	{
 		type = TYPE::RED;
 
@@ -100,6 +100,14 @@ void Pole::draw()
 		gluCylinder(quad, radius, radius, height, sides, 1);//円柱
 		glPopMatrix();
 
+
+		//HPバー---------------------------------------------------
+
+		const float height = 1;							//HPバーの高さ
+		const float playerPole = HP / 100.f;			//player側の部分
+		const float maxShow = maxHP / 100.f;			//HPバーの横の長さ
+		const float posHeight = 10.0f;					//HPバーの高さ
+
 		//ビルボード行列設定--------
 		glm::mat4 view;
 		glGetFloatv(GL_MODELVIEW_MATRIX, (float*)&view);
@@ -108,20 +116,14 @@ void Pole::draw()
 		m[3][0] = m[3][1] = m[3][2] = 0;
 		glMultMatrixf((float*)&m);
 		//--------------------------
-		//HPバー---------------------------------------------------
 
-		const float height = 1;						//HPバーの高さ
-		const float playerPole = HP / 50.f;			//player側の部分
-		const float maxShow = maxHP / 50.f;			//HPバーの横の長さ
-		const float posHeight = 10.0f;				//HPバーの高さ
-
-		glTranslatef(-maxShow / 2, posHeight, 0);
+		glTranslatef(0, posHeight, 0);
 		glBegin(GL_QUADS);
 		{
 			//プレイヤー側のHP
 			glColor3f(blueColor.r, blueColor.g, blueColor.b);
-			glVertex3f(0, 0, 0);
-			glVertex3f(0, height, 0);
+			glVertex3f(-maxShow, 0, 0);
+			glVertex3f(-maxShow, height, 0);
 			glVertex3f(playerPole, height, 0);
 			glVertex3f(playerPole, 0, 0);
 

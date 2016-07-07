@@ -3,11 +3,12 @@
 
 #include "../glm/glm.hpp"
 
+//所属陣営
 enum TYPE
 {
-	NEUTRAL,
-	BLUE,
-	RED,
+	NEUTRAL,	//中立
+	BLUE,		//ブルーチーム
+	RED,		//レッドチーム
 };
 
 ////////////////////////////////////

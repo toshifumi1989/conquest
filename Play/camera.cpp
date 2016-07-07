@@ -8,6 +8,10 @@
 
 Camera *camera;
 
+
+///////////////////////////////
+//play画面準備
+///////////////////////////////
 void Camera::setUp(glm::vec3 _pos, glm::vec3 _target)
 {
 	pos = _pos;
@@ -16,6 +20,9 @@ void Camera::setUp(glm::vec3 _pos, glm::vec3 _target)
 	lastTarget = _target;
 }
 
+/////////////////////////////
+//更新
+/////////////////////////////
 void Camera::update()
 {
 
@@ -52,6 +59,9 @@ void Camera::update()
 	lastTarget = target;
 }
 
+//////////////////////////////
+//3D描画設定
+//////////////////////////////
 void Camera::draw()
 {
 
@@ -71,6 +81,9 @@ void Camera::draw()
 
 }
 
+/////////////////////////////
+//ヘッドアップディスプレイ
+/////////////////////////////
 void Camera::HUD()
 {
 	glMatrixMode(GL_PROJECTION);

@@ -65,8 +65,8 @@ void Play::init()
 		}
 	}
 
-
-	//プレイヤー--------------------------------------------------------------------------
+	//ブルーチーム----------------------------------------------------------------
+	//プレイヤー
 	glm::vec3 centerToPlayer(-30, 4, -100);		//フィールド中心からの位置
 	float playerSize = 0.5f;					//プレイヤーの大きさ
 	player = new Player(field->center + centerToPlayer, playerSize, 0 ,TYPE::BLUE);
@@ -77,7 +77,7 @@ void Play::init()
 	NPC* subSuppoter = new NPC(field->center + centerToSupporter, supporterSize, 0, TYPE::BLUE);
 	supporter.push_back(subSuppoter);
 
-	//エネミー---------------------------------------------------------------------------
+	//レッドチーム----------------------------------------------------------------
 	//1人目
 	glm::vec3 centerToEnemy1(30, 4, 100);		//1人目のフィールド中心からの位置
 	float enemySize = 0.5f;						//エネミーの大きさ

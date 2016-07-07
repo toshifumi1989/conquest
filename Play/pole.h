@@ -19,7 +19,7 @@ public:
 		type = _type;
 		if (_type == TYPE::NEUTRAL)
 		{
-			HP = maxHP / 2;
+			HP = 0 ;
 		}
 		else if (_type == TYPE::BLUE)
 		{
@@ -27,7 +27,7 @@ public:
 		}
 		else
 		{
-			HP = 0;
+			HP = -maxHP;
 		}
 
 	}
