@@ -21,14 +21,12 @@ public:
 	}
 	~Player(){}
 
-	glm::vec3 color;		//キャラクターの色
-
 	void update();					//更新
+	void draw();					//描画
 	void move();					//キャラクター移動
 	void attack();					//攻撃
-	void draw();					//描画
 
-	
+	glm::vec3 color;		//キャラクターの色
 };
 
 extern Player *player;

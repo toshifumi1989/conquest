@@ -11,7 +11,7 @@ Field *field;
 /////////////////////////////
 void Field::setup(const char* _texture)
 {
-
+	//イメージ読み込み-----------
 	FILE *pFile = fopen(_texture, "rb");
 	assert(pFile != NULL);
 
@@ -50,6 +50,8 @@ void Field::setup(const char* _texture)
 		GL_UNSIGNED_BYTE,	//GLenum type, 
 		pixels);			//const GLvoid *pixels
 
+	//----------------------------------------
+	//データ保存------------------------------
 	for (int z = 0; z < vtx; z++)
 	{
 		for (int x = 0; x < vtx; x++)
@@ -59,11 +61,9 @@ void Field::setup(const char* _texture)
 			tex.push_back((float)x / (vtx - 1));
 			tex.push_back((float)z / (vtx - 1));
 
-
-			
 			//ハイトマップ
 			const float ratio = (pixels[vtx * z + x].r + pixels[vtx * z + x].g + pixels[vtx * z + x].b) / 255.f;//0~1に変更
-			const float fieldHeight = 2.f;	//フィールドの高さ
+			const float fieldHeight = 1.f;	//フィールドの高さ
 
 			float y = ratio * fieldHeight;
 
@@ -145,16 +145,16 @@ void Field::draw()
 float  Field::intersect(glm::vec3 _pos)
 {
 
-	glm::vec3 orig = glm::vec3(_pos.x, -1, _pos.z);//始点で、直線上の任意の点
-	glm::vec3 dir = glm::vec3(0, 1, 0);//直線の向きで、直線を定義する
-	glm::vec3 vert0;//以下の３点で三角形を定義
+	glm::vec3 orig = glm::vec3(_pos.x, -1, _pos.z);	//始点で、直線上の任意の点
+	glm::vec3 dir = glm::vec3(0, 1, 0);				//直線の向きで、直線を定義する
+	glm::vec3 vert0;								//以下の３点で三角形を定義
 	glm::vec3 vert1;
 	glm::vec3 vert2;
-	glm::vec3 distance = glm::vec3(0, 0, 0);//xメンバに、始点から交差点の距離が取得される
+	glm::vec3 distance = glm::vec3(0, 0, 0);		//xメンバに、始点から交差点の距離が取得される
 
-	int temporaryX = _pos.x;//x座標の整数部分
-	int temporaryZ = _pos.z;//z座標の整数部分
-	float nowPosY = _pos.y;//現在のy座標
+	int temporaryX = _pos.x;	//x座標の整数部分
+	int temporaryZ = _pos.z;	//z座標の整数部分
+	float nowPosY = _pos.y;		//現在のy座標
 
 	if ((_pos.x - temporaryX) + (_pos.z - temporaryZ) < 1)
 	{
@@ -164,6 +164,7 @@ float  Field::intersect(glm::vec3 _pos)
 		vert1 = glm::vec3(temporaryX + 1, vertex[(vtx * temporaryZ + temporaryX + 1) * 3 + 1], temporaryZ);
 		vert2 = glm::vec3(temporaryX, vertex[((vtx * (temporaryZ + 1)) + temporaryX) * 3 + 1], temporaryZ + 1);
 
+		//当たっていれば距離を返す
 		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
 		{
 			return distance.x;
@@ -176,29 +177,32 @@ float  Field::intersect(glm::vec3 _pos)
 		vert1 = glm::vec3(temporaryX, vertex[((vtx * (temporaryZ + 1)) + temporaryX) * 3 + 1], temporaryZ + 1);
 		vert2 = glm::vec3(temporaryX + 1, vertex[((vtx * (temporaryZ + 1)) + temporaryX + 1) * 3 + 1], temporaryZ + 1);
 
+		//当たっていれば距離を返す
 		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
 		{
 			return distance.x;
 		}
 	}
 
-
 	glm::vec3 intersect = orig + dir * distance.x;
 	return intersect.y;
 }
 
+////////////////////////////////////////////
+//フィールドと弾の当たり判定
+////////////////////////////////////////////
 bool Field::hitBullet(glm::vec3 _pos)
 {
-	glm::vec3 orig = glm::vec3(_pos.x, -1, _pos.z);
-	glm::vec3 dir = glm::vec3(0, 1, 0);
-	glm::vec3 vert0;
+	const glm::vec3 orig = glm::vec3(_pos.x, -0.1f, _pos.z);	//始点で、直線上の任意の点
+	const glm::vec3 dir = glm::vec3(0, 1, 0);					//直線の向きで、直線を定義する
+	glm::vec3 vert0;											//以下の３点で三角形を定義
 	glm::vec3 vert1;
 	glm::vec3 vert2;
-	glm::vec3 distance = glm::vec3(0, 0, 0);
+	glm::vec3 distance = glm::vec3(0, 0, 0);					//xメンバに、始点から交差点の距離が取得される
 
-	int temporaryX = _pos.x;
-	int temporaryZ = _pos.z;
-	float nowPosY = _pos.y;
+	const int temporaryX = _pos.x;
+	const int temporaryZ = _pos.z;
+	const float nowPosY = _pos.y;
 
 	//上の三角
 	if ((_pos.x - temporaryX) + (_pos.z - temporaryZ) < 1)
@@ -207,6 +211,7 @@ bool Field::hitBullet(glm::vec3 _pos)
 		vert1 = glm::vec3(temporaryX + 1, field->vertex[(vtx * temporaryZ + temporaryX + 1) * 3 + 1], temporaryZ);
 		vert2 = glm::vec3(temporaryX, field->vertex[((vtx * (temporaryZ + 1)) + temporaryX) * 3 + 1], temporaryZ + 1);
 
+		//当たっていればtrueで返す
 		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
 		{
 			if (_pos.y <= distance.x)
@@ -214,7 +219,6 @@ bool Field::hitBullet(glm::vec3 _pos)
 				return true;
 			}
 		}
-
 	}
 	else
 	{//下の三角
@@ -223,6 +227,7 @@ bool Field::hitBullet(glm::vec3 _pos)
 		vert1 = glm::vec3(temporaryX, field->vertex[((vtx * (temporaryZ + 1)) + temporaryX) * 3 + 1], temporaryZ + 1);
 		vert2 = glm::vec3(temporaryX + 1, field->vertex[((vtx * (temporaryZ + 1)) + temporaryX + 1) * 3 + 1], temporaryZ + 1);
 
+		//当たっていればtrueで返す
 		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, distance))
 		{
 			if (_pos.y <= distance.x)
@@ -234,3 +239,31 @@ bool Field::hitBullet(glm::vec3 _pos)
 
 	return false;
 }
+
+///////////////////////////////////////////////
+//x軸フィールド外かどうか(true:外 false:内
+///////////////////////////////////////////////
+bool Field::outXaxisField(glm::vec3 _pos)
+{
+	if (_pos.x > field->center.x + field->edge || _pos.x < field->center.x - field->edge)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+///////////////////////////////////////////
+//z軸フィールド外かどうか
+//////////////////////////////////////////
+bool Field::outZaxisField(glm::vec3 _pos)
+{
+	if (_pos.z > field->center.z + field->edge || _pos.z < field->center.z - field->edge)	//z軸
+	{
+		return true;
+	}
+
+	return false;
+}
+
+

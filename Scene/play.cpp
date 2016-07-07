@@ -22,6 +22,7 @@ void Play::init()
 	const float fieldToDistance = 120;
 
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::WALL]);
+
 	Wall *northWall = new Wall(glm::vec3(field->center.x, 0, field->center.z + fieldToDistance), 0);	//z100の壁
 	northWall->read("wall.bmp");
 	wall.push_back(northWall);
@@ -39,37 +40,52 @@ void Play::init()
 	wall.push_back(westWall);
 
 	//ポール--------------------------------------------------------------------------------
-	const int poleNum = 4;	//poleの数(pole * pole)
-	bool type = true;		//true：プレイヤー　false：敵
+	const char poleNum = 3;	//poleの数(pole * pole)
+	const char polePos = 60;//中心位置からの距離
+	unsigned char type;		//0:中立 1:プレイヤー 2:エネミー
+
 	for (int y = 0; y < poleNum; y++)
 	{
-		if (y >= 2)
-		{
-			type = false;
+		if (y == 0)
+		{//プレイヤー側
+			type = TYPE::PLAYER;
+		}
+		else if (y == 1)
+		{//真ん中
+			type = TYPE::NEUTRAL;
+		}
+		else
+		{//エネミー	側
+			type = TYPE::ENEMY;
 		}
 		for (int x = 0; x < poleNum; x++)
 		{
-			Pole *subPole = new Pole(glm::vec3(field->center.x + (40 * x - 60), 0, field->center.z + (40 * y - 60)), type);
+			Pole *subPole = new Pole(glm::vec3(field->center.x + (polePos * x - polePos), 0, field->center.z + (polePos * y - polePos)), type);
 			pole.push_back(subPole);
 		}
 	}
 
 
 	//プレイヤー--------------------------------------------------------------------------
-	player = new Player(glm::vec3(field->center.x, 4, field->center.z - 100), 0.5f, 0);
+	glm::vec3 centerToPlayer(0, 4, -100);	//フィールド中心からの位置
+	float playerSize = 0.5f;				//プレイヤーの大きさ
+	player = new Player(field->center + centerToPlayer, playerSize, 0);
 
 	//エネミー---------------------------------------------------------------------------
-	Enemy* subEnemy = new Enemy(field->center + glm::vec3(0, 4, 100), 0.5f, 180);
+	glm::vec3 centerToEnemy(30, 4, 100);		//フィールド中心からの位置
+	float enemySize = 0.5f;					//エネミーの大きさ
+	Enemy* subEnemy = new Enemy(field->center + centerToEnemy, enemySize, 180);
 	enemy.push_back(subEnemy);
 
 	//カメラ------------------------------------------------------------------------------
 	camera = new Camera();
 	const float posHeight = 2.0f;	//カメラ高さ
-	const float distance = 7.0f;	//プレイヤーとの距離
+	const float distance = -7.0f;	//プレイヤーとの距離
 	const float targetHeight = 1.0f;//ターゲット位置
+
 	camera->setUp(
 		player->pos + glm::vec3(0, posHeight, distance),	//カメラの初期位置
-		player->pos + glm::vec3(0, targetHeight,0));		//ターゲット位置
+		player->pos + glm::vec3(0, targetHeight, 0));		//ターゲット位置
 
 }
 
@@ -88,30 +104,48 @@ void Play::update()
 	std::list< Enemy* >::iterator enemyIter = enemy.begin();
 	while (enemyIter != enemy.end())
 	{
+		(*enemyIter)->action();
 		(*enemyIter)->update();
 		enemyIter++;
 	}
 
 	//弾----------------------------------
-	std::list< Bullet* >::iterator bulletIter = playerBullet.begin();
-	while (bulletIter != playerBullet.end())
+	//プレイヤー
+	std::list< Bullet* >::iterator pbulletIter = playerBullet.begin();
+	while (pbulletIter != playerBullet.end())
 	{
-		(*bulletIter)->update();	//移動更新
-		(*bulletIter)->exist();		//存在確認
+		(*pbulletIter)->update();	//移動更新
+		(*pbulletIter)->exist();		//存在確認
 
 		//もう弾が存在しないとき消去
-		if (!(*bulletIter)->onExistFlag)
+		if (!(*pbulletIter)->onExistFlag)
 		{
-			bulletIter = playerBullet.erase(bulletIter);
+			pbulletIter = playerBullet.erase(pbulletIter);
 			return;
 		}
-		bulletIter++;
+		pbulletIter++;
 	}
 
+	//エネミー
+	std::list< Bullet* >::iterator ebulletIter = enemyBullet.begin();
+	while (ebulletIter != enemyBullet.end())
+	{
+		(*ebulletIter)->update();	//移動更新
+		(*ebulletIter)->exist();		//存在確認
+
+										//もう弾が存在しないとき消去
+		if (!(*ebulletIter)->onExistFlag)
+		{
+			ebulletIter = enemyBullet.erase(ebulletIter);
+			return;
+		}
+		ebulletIter++;
+	}
 	//円柱---------------------------------
 	for (int i = 0; i < pole.size(); i++)
 	{
-		pole[i]->update();
+		pole[i]->occupation();
+		pole[i]->recovery();
 	}
 
 	//カメラ---------------------------------
@@ -131,26 +165,32 @@ void Play::draw()
 	//カメラ設定--------------------------------------
 	camera->draw();
 
-
-	//プレイヤー--------------------------------------
+	//キャラクター-------------------------------------
+	//プレイヤー
 	player->draw();
 
-	//弾----------------------------------------------
-	std::list< Bullet* >::iterator bulletIter = playerBullet.begin();
-	while (bulletIter != playerBullet.end())
-	{
-		(*bulletIter)->draw();
-		bulletIter++;
-	}
-
-	printf("size = %d\n", playerBullet.size());
-
-	//エネミー-------------------------------------------
+	//エネミー
 	std::list< Enemy* >::iterator enemyIter = enemy.begin();
 	while (enemyIter != enemy.end())
 	{
 		(*enemyIter)->draw();
 		enemyIter++;
+	}
+	//弾----------------------------------------------
+	//プレイヤー
+	std::list< Bullet* >::iterator pbulletIter = playerBullet.begin();
+	while (pbulletIter != playerBullet.end())
+	{
+		(*pbulletIter)->draw();
+		pbulletIter++;
+	}
+
+	//エネミー
+	std::list< Bullet* >::iterator ebulletIter = enemyBullet.begin();
+	while (ebulletIter != enemyBullet.end())
+	{
+		(*ebulletIter)->draw();
+		ebulletIter++;
 	}
 
 	//フィールド（地面描画--------------------------
@@ -159,7 +199,9 @@ void Play::draw()
 	//壁描画----------------------------------------
 	for (int i = 0; i < wall.size(); i++)
 	{
-		wall[i]->draw();
+
+			wall[i]->draw(TEXTURE_ID::WALL);
+
 	}
 
 	//円柱------------------------------------------

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "camera.h"
 #include "player.h"
+#include "field.h"
 #include "../glut.h"
 
 Camera *camera;
@@ -10,14 +11,18 @@ Camera *camera;
 void Camera::setUp(glm::vec3 _pos, glm::vec3 _target)
 {
 	pos = _pos;
+	lastPos = _pos;
 	target = _target;
+	lastTarget = _target;
 }
 
 void Camera::update()
 {
+
 	//カメラの移動
 	const float posHeight = 2.0f;	//カメラの高さ調整用変数
 	const float distance = 7.0f;	//カメラの距離
+
 	pos.x = player->pos.x - sin(player->yaw * M_PI / 180) * distance;
 	pos.y = player->pos.y + posHeight;
 	pos.z = player->pos.z - cos(player->yaw * M_PI / 180) * distance;
@@ -27,9 +32,20 @@ void Camera::update()
 	target = glm::vec3(0, targetHeight, 0) + player->pos;
 
 	//カメラ補完設定
-	const float cameraSpeed = 0.1f;	//カメラ補完の速さ
+	const float cameraSpeed = 0.2f;	//カメラ補完の速さ
 	pos = lastPos + (pos - lastPos) * cameraSpeed;
 	target = lastTarget + (target - lastTarget) * cameraSpeed;
+
+
+	if (field->outXaxisField(pos))
+	{
+		pos.x = lastPos.x;
+	}
+	
+	if (field->outZaxisField(pos))
+	{
+		pos.z = lastPos.z;
+	}
 
 	//位置の保存
 	lastPos = pos;
@@ -55,7 +71,7 @@ void Camera::draw()
 
 }
 
-void Camera::twoDimensionCamera()
+void Camera::HUD()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

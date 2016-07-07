@@ -15,7 +15,7 @@ public:
 	}
 	~Wall(){}
 
-	void draw();
+	void draw(const char _texterID);
 
 private:
 	glm::vec3 pos;

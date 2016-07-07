@@ -37,7 +37,7 @@ void Title::draw()
 	//RGB初期化
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//カメラ平面設定
-	camera->twoDimensionCamera();
+	camera->HUD();
 
 	//タイトル画面背景
 	glEnable(GL_TEXTURE_2D);

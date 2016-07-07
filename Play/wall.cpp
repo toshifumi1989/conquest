@@ -1,12 +1,14 @@
 #include "wall.h"
-
+#include "field.h"
+#include "camera.h"
 std::vector< Wall* >wall;
 
 //////////////////////////////////////////
 //•`‰æ
 /////////////////////////////////////////
-void Wall::draw()
+void Wall::draw(const char _texterID)
 {
+
 	const int wallTop = 120;
 	const int wallButtom = -120;
 	const int wallHeight = 120;
@@ -17,7 +19,7 @@ void Wall::draw()
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_2D);
 
-		glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::WALL]);
+		glBindTexture(GL_TEXTURE_2D, textures[_texterID]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 

@@ -6,6 +6,7 @@
 
 
 std::list < Bullet* > playerBullet;
+std::list < Bullet* > enemyBullet;
 
 ////////////////////////////////////////
 //更新
@@ -42,6 +43,8 @@ void Bullet::draw()
 /////////////////////////////////////////
 bool Bullet::hitPole()
 {
+	const float hitDistance = 4.5f;
+
 	//円柱の数だけ確認する
 	for (int i = 0; i < pole.size(); i++)
 	{
@@ -51,9 +54,12 @@ bool Bullet::hitPole()
 			+ (pos.z - pole[i]->pos.z) * (pos.z - pole[i]->pos.z);
 		
 		//円柱と当たった場合
-		if (bulletToPole <= 2)
-		{			
-			pole[i]->HP -= damageSize;
+		if (bulletToPole <= hitDistance)
+		{
+			//同じ陣営のポールに当たっても反応しない
+			if(!((onPlayer && pole[i]->type == TYPE::PLAYER) ||
+				(!onPlayer && pole[i]->type == TYPE::ENEMY)))
+			pole[i]->HP += damageSize;
 			return true;
 		}
 	}
@@ -69,8 +75,7 @@ bool Bullet::hitPole()
 ///////////////////////////////////
 bool Bullet::outField()
 {
-	if (pos.x > field->center.x + 100 || pos.x < field->center.x - 100 ||
-		pos.z > field->center.z + 100 || pos.z < field->center.z - 100)
+	if (field->outXaxisField(pos) || field->outZaxisField(pos))
 	{
 		//外に出たときはtrue
 		return true;
