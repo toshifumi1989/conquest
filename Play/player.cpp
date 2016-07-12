@@ -4,6 +4,7 @@
 #include "player.h"
 #include "bullet.h"
 #include "field.h"
+#include "pole.h"
 #include "camera.h"
 #include "texture.h"
 
@@ -18,24 +19,17 @@ void Player::update()
 {
 	speed *= 0.9;	//減速
 
-	//移動------------------------------------
+	//移動
 	pos += speed;
 
 	//フィールドの外に出たら前のフレームの位置に戻る
-	if (field->outXaxisField(pos))
-	{//x軸
-		pos.x = lastPos.x;
-	}
-
-	if (field->outZaxisField(pos))
-	{//z軸
-		pos.z = lastPos.z;
-	}
+	moveLimit();
 
 	//y軸フィールドの高さ
 	pos.y = field->intersect(pos);
 
-	lastPos = pos;	//位置の保存
+	//位置の保存
+	lastPos = pos;	
 }
 
 ///////////////////////////////////
@@ -84,6 +78,76 @@ void Player::move()
 	}
 
 }
+
+//////////////////////////////////
+//移動制限
+//////////////////////////////////
+void Player::moveLimit()
+{
+	//x軸(線の当たり判定
+	if (field->outXaxisField(pos))
+	{
+		pos.x = lastPos.x;
+	}
+
+	//z軸(線の当たり判定
+	if (field->outZaxisField(pos))
+	{
+		pos.z = lastPos.z;
+	}
+
+	//円の当たり判定
+	if (poleCollision()||
+		NPCCollision(enemy)||
+		NPCCollision(supporter))
+	{
+		pos = lastPos;
+	}
+
+}
+
+//////////////////////////////////
+//円柱との衝突判定
+//////////////////////////////////
+bool Player::poleCollision()
+{
+	for (int i = 0; i < pole.size(); i++)
+	{
+		const auto distance = 
+			(pos.x - pole[i]->pos.x) * (pos.x - pole[i]->pos.x)
+			+ (pos.z - pole[i]->pos.z) * (pos.z - pole[i]->pos.z);
+
+		if (distance < 3)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+//////////////////////////////////
+//NPCとの衝突判定
+//////////////////////////////////
+bool Player::NPCCollision(std::list< NPC* > _NPC)
+{
+	std::list<NPC*>::iterator iter = _NPC.begin();
+	while (iter != _NPC.end())
+	{
+		const auto distance =
+			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
+			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
+
+		if (distance < 2)
+		{
+			return true;
+		}
+
+		iter++;
+	}
+	return false;
+}
+
+
 
 //////////////////////////////////
 //攻撃

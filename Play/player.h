@@ -3,6 +3,7 @@
 
 #include <list>
 #include "gameObject.h"
+#include "npc.h"
 #include "field.h"
 
 /////////////////////////////////////
@@ -38,6 +39,9 @@ public:
 	void update();					//更新
 	void draw();					//描画
 	void move();					//キャラクター移動
+	void moveLimit();				//移動制限場所の当たり判
+	bool poleCollision();			//円柱との衝突判定
+	bool NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
 	void attack();					//攻撃
 	void HUD();						//ヘッドアップディスプレイ
 	void shootMarker();				//ショットマーカー

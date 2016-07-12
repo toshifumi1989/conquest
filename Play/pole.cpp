@@ -142,3 +142,6 @@ void Pole::draw()
 	glPopMatrix();
 
 }
+
+
+
