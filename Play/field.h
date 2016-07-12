@@ -27,8 +27,8 @@ public:
 	unsigned int edge;					//フィールドの端
 
 private:
-	const int vtx;				//フィールドのピクセル数
-	const int size;				//フィールドの広さ
+	const int vtx;						//フィールドのピクセル数
+	const int size;						//フィールドの広さ
 
 };
 

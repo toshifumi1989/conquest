@@ -11,8 +11,7 @@
 class Bullet :public GameObject {
 public:
 	Bullet(glm::vec3 _pos,float _yaw,unsigned int _type,int _damage) :
-		onExistFlag(true),
-		onCount(20)
+		onExistFlag(true)
 	{
 		const auto bulletSpeed = 2.0f;	//弾の速さ
 		
@@ -23,6 +22,7 @@ public:
 
 		type = _type;
 		damageSize = _damage;
+		onCount = damageSize / 10;
 	}
 	~Bullet() {}
 
@@ -36,7 +36,7 @@ public:
 	bool onExistFlag;				//存在しているか true:まだ存在する false:すでにない
 
 private:
-	unsigned char onCount;			//残りの生存カウント
+	char onCount;			//残りの生存カウント
 	unsigned int damageSize;		//ダメージ量
 	unsigned int type;				//所属陣営
 

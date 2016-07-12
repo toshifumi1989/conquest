@@ -14,10 +14,8 @@ std::list < Bullet* > enemyBullet;
 ////////////////////////////////////////
 void Bullet::update()
 {
-
 	pos += speed;	//ˆÚ“®
-	onCount--;
-	
+	onCount--;	
 }
 
 ////////////////////////////////////////
@@ -25,7 +23,7 @@ void Bullet::update()
 ////////////////////////////////////////
 void Bullet::draw() 
 {
-	const auto size = 0.1f;	//‹…‚Ì”¼Œa
+	const auto size = 0.1f;		//‹…‚Ì”¼Œa
 	const auto divideNum = 20;	//‹…‚Ì•ªŠ„”
 
 	glEnable(GL_DEPTH_TEST);
@@ -56,13 +54,14 @@ bool Bullet::hitCharacter(std::list< NPC* > _character)
 			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
 
 		if (distance <= hitDistance)
-		{
-			//“–‚½‚Á‚½‚Æ‚«
-			(*iter)->HP -= damageSize;
+		{//“–‚½‚Á‚½‚Æ‚«
 
+			if (type != (*iter)->type)
+			{//Š‘®‚ªˆá‚¤‚È‚çƒ_ƒ[ƒW‚ğó‚¯‚é		
+				(*iter)->HP -= damageSize;
+			}
 			return true;
 		}
-
 		iter++;
 	}
 	//“–‚½‚Á‚Ä‚¢‚È‚¢‚Æ‚«‚Ífalse

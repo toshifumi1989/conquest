@@ -33,21 +33,21 @@ public:
 	}
 	~Pole(){}
 
-	void recovery();	//©“®‰ñ•œ
-	void draw();		//•`‰æ
-	void occupation();	//è—Ì‚·‚é
+	void recovery();			//©“®‰ñ•œ
+	void draw();				//•`‰æ
+	void occupation();			//è—Ì‚·‚é
 
 
-	int HP;					//‰~’Œ‚Ìw‰cƒQ[ƒW
-	unsigned int type;		//Š‘®w‰c
+	int HP;						//‰~’Œ‚Ìw‰cƒQ[ƒW
+	unsigned int type;			//Š‘®w‰c
 
 private:
-	const int maxHP;				//Å‘å‘Ï‹v’l
-	const float radius;				//‰~’Œ‚Ì”¼Œa
-	const float height;				//‰~’Œ‚Ì‚‚³
-	const unsigned int sides;		//‰~’Œ‚Ì•ªŠ„”
+	const int maxHP;			//Å‘å‘Ï‹v’l
+	const float radius;			//‰~’Œ‚Ì”¼Œa
+	const float height;			//‰~’Œ‚Ì‚‚³
+	const unsigned int sides;	//‰~’Œ‚Ì•ªŠ„”
 
-	glm::vec3 color;		//F
+	glm::vec3 color;			//F
 
 };
 

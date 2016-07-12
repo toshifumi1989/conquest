@@ -12,9 +12,10 @@ std::list< NPC* > supporter;
 ///////////////////////////
 void NPC::update()
 {
-	speed *= 0.9f;
-	pos += speed;
-	pos.y = field->intersect(pos);
+	speed *= 0.9f;	//Œ¸‘¬
+	pos += speed;	//ˆÊ’u‚ÌˆÚ“®
+
+	pos.y = field->intersect(pos);	//yÀ•WˆÊ’u
 
 	attackCount--;
 }

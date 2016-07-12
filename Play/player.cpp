@@ -90,15 +90,20 @@ void Player::move()
 //////////////////////////////////
 void Player::attack()
 {
-	static bool presSpace = 0;			//前のフレームでもスペースがtrueだったか確認
-	const auto adjustBody = size / 2;	//体のサイズのための位置調整
-	auto damage = 100;					//ダメージ
+	static bool presSpace = 0;					//前のフレームでもスペースがtrueだったか確認
+	const auto adjustBody = size / 2;			//体のサイズのための位置調整
+	const auto damage = 100 + chargeGauge * 2;	//ダメージ
 
+	if (keys[' '])
+	{//スペースを押すとチャージする
+		if (maxChargeGauge > chargeGauge)chargeGauge++;
+	}
 
-	if (keys[' '] && presSpace == false)
-	{
-		Bullet *bullet = new Bullet(pos + glm::vec3(0,adjustBody,0), yaw,type, damage);
+	if (keys[' '] == false && presSpace == true)
+	{//スペースを離すと弾を撃つ
+		Bullet *bullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
 		playerBullet.push_back(bullet);
+		chargeGauge = 0;		//チャージ量の初期化
 	}
 
 	presSpace = keys[' '];
@@ -117,7 +122,7 @@ void Player::draw()
 	{
 		glColor3f(color.r, color.g, color.b);
 		glTranslatef(pos.x, pos.y + adjustBody, pos.z);
-		glRotatef(yaw, 0, 1, 0);	
+		glRotatef(yaw, 0, 1, 0);
 		glutSolidSphere(size, divideNum, divideNum);
 	}
 	glPopMatrix();
@@ -129,7 +134,15 @@ void Player::draw()
 /////////////////////////////
 void Player::HUD()
 {
-	
+	shootMarker();			//ショットマーカー
+	bulletChargeGauge();	//チャージゲージ
+}
+
+/////////////////////////////////
+//ショットマーカー
+////////////////////////////////
+void Player::shootMarker()
+{
 	glEnable(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::MARK]);
@@ -143,9 +156,9 @@ void Player::HUD()
 	glBegin(GL_QUADS);
 	{
 		glTexCoord2d(0, 1);
-		glVertex3d((camera->right / 2) - 100, (camera->top / 2) + 200 , 0);
+		glVertex3d((camera->right / 2) - 100, (camera->top / 2) + 200, 0);
 		glTexCoord2d(1, 1);
-		glVertex3d((camera->right / 2) + 100, (camera->top / 2) + 200 , 0);
+		glVertex3d((camera->right / 2) + 100, (camera->top / 2) + 200, 0);
 		glTexCoord2d(1, 0);
 		glVertex3d((camera->right / 2) + 100, (camera->top / 2) + 450, 0);
 		glTexCoord2d(0, 0);
@@ -155,7 +168,54 @@ void Player::HUD()
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
-
 }
 
+///////////////////////////////////
+//弾のチャージゲージ
+//////////////////////////////////
+void Player::bulletChargeGauge()
+{
+	const auto gaugeHeight = 200;
+	const auto gaugeWidth = 700;
+	const auto gaugeSize = ((float)chargeGauge / maxChargeGauge) * gaugeWidth;
 
+	//ゲージ表示
+	glPushMatrix();
+	{
+		glTranslatef(4000, 1000, 0);
+		
+		glBegin(GL_QUADS);
+		{
+			//maxゲージ(下地
+			glColor3f(1, 1, 1);	//白色
+			glVertex2f(0, 0);
+			glVertex2f(gaugeWidth, 0);
+			glVertex2f(gaugeWidth, gaugeHeight);
+			glVertex2f(0, gaugeHeight);
+
+			//現在のチャージ量
+			glColor3f(0, 1, 0);	//緑色
+			glVertex2f(0, 0);
+			glVertex2f(gaugeSize, 0);
+			glVertex2f(gaugeSize, gaugeHeight);
+			glVertex2f(0, gaugeHeight);		
+		}
+		glEnd();
+	}
+	glPopMatrix();
+
+	//ChargeGauge文字表示
+	glPushMatrix();
+	{
+		glColor3f(1, 1, 1);	//白
+		char word[] = "ChargeGauge";
+		glTranslatef(3200, 1000, 0);
+		glScalef(1, 2, 0);
+		glLineWidth(2);
+		for (int i = 0; word[i] != 0; i++)
+		{
+			glutStrokeCharacter(GLUT_STROKE_ROMAN,word[i]);
+		}
+	}
+	glPopMatrix();
+}

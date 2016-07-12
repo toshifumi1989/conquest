@@ -11,7 +11,9 @@
 class Player : public GameObject
 {
 public:
-	Player(glm::vec3 _pos,float _size,float _yaw,unsigned int _type) 
+	Player(glm::vec3 _pos,float _size,float _yaw,unsigned int _type):
+		chargeGauge(0),
+		maxChargeGauge(100)
 	{
 		pos = _pos;
 		lastPos = _pos;
@@ -38,11 +40,15 @@ public:
 	void move();					//キャラクター移動
 	void attack();					//攻撃
 	void HUD();						//ヘッドアップディスプレイ
+	void shootMarker();				//ショットマーカー
+	void bulletChargeGauge();		//ショットゲージ
 
 private:
 	glm::vec3 color;				//キャラクターの色
 	unsigned int type;				//所属陣営
 
+	int chargeGauge;			//ショットチャージ量
+	const int maxChargeGauge;			//ショットゲージの最大値
 };
 
 extern Player *player;

@@ -72,27 +72,31 @@ void Play::init()
 
 	//ブルーチーム----------------------------------------------------------------
 	//プレイヤー
-	glm::vec3 centerToPlayer(-30, 4, -100);		//フィールド中心からの位置
+	glm::vec3 centerToPlayer(30, 4, -100);		//フィールド中心からの位置
 	float playerSize = 0.5f;					//プレイヤーの大きさ
 	player = new Player(field->center + centerToPlayer, playerSize, 0 ,TYPE::BLUE);
 
 	//サポーター
-	glm::vec3 centerToSupporter(30, 4, -100);	//フィールド中心からの位置
-	float supporterSize = 0.5f;
-	NPC* subSuppoter = new NPC(field->center + centerToSupporter, supporterSize, 0, TYPE::BLUE);
-	supporter.push_back(subSuppoter);
+	auto supporterNum = 3;			//サポーターの数
+	auto supporterSize = 0.5f;		//サポーターの大きさ
+
+	for (int i = 0; i < supporterNum; i++)
+	{
+		glm::vec3 centerToSupporter((i * 20) - 30, 4, -100);	//フィールド中心からの位置	
+		NPC* subSuppoter = new NPC(field->center + centerToSupporter, supporterSize, 0, TYPE::BLUE);
+		supporter.push_back(subSuppoter);
+	}
 
 	//レッドチーム----------------------------------------------------------------
-	//1人目
-	glm::vec3 centerToEnemy1(30, 4, 100);		//1人目のフィールド中心からの位置
-	float enemySize = 0.5f;						//エネミーの大きさ
-	NPC* subEnemy1 = new NPC(field->center + centerToEnemy1, enemySize, 180,TYPE::RED);
-	enemy.push_back(subEnemy1);
+	auto enemyNum = 4;				//エネミーの数
+	auto enemySize = 0.5f;			//エネミーの大きさ
 
-	//2人目
-	glm::vec3 centerToEnemy2(-30, 4, 100);		//2人目のフィールド中心からの位置
-	NPC* subEnemy2 = new NPC(field->center + centerToEnemy2, enemySize, 180, TYPE::RED);
-	enemy.push_back(subEnemy2);
+	for (int i = 0; i < enemyNum; i++)
+	{
+		glm::vec3 centerToEnemy((i * 20) - 30, 4, 100);			//フィールド中心からの位置
+		NPC* subEnemy = new NPC(field->center + centerToEnemy, enemySize, 180, TYPE::RED);
+		enemy.push_back(subEnemy);
+	}
 
 	//カメラ------------------------------------------------------------------------------
 	camera = new Camera();

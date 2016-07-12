@@ -64,7 +64,6 @@ void Camera::update()
 //////////////////////////////
 void Camera::draw()
 {
-
 	glMatrixMode(GL_PROJECTION);	// 投影変換行列の設定
 	glLoadIdentity();				// 変換行列の初期化
 
@@ -82,7 +81,7 @@ void Camera::draw()
 }
 
 /////////////////////////////
-//ヘッドアップディスプレイ
+//ヘッドアップディスプレイ設定
 /////////////////////////////
 void Camera::HUD()
 {

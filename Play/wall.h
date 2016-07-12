@@ -15,11 +15,11 @@ public:
 	}
 	~Wall(){}
 
-	void draw(const char _texterID);
+	void draw(const char _texterID);	//•`‰æ
 
 private:
-	glm::vec3 pos;
-	float yaw;
+	glm::vec3 pos;		//ˆÊ’u
+	float yaw;			//Œü‚«
 
 };
 

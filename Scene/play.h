@@ -3,18 +3,20 @@
 
 #include "scene.h"
 
+/////////////////////////////
+//ゲームプレイシーン
+/////////////////////////////
 class Play : public Scene
 {
 public:
 	Play(){}
 	~Play() {}
 
-
-	void init();
-	void update();
-	void draw();
-	void HUD();
-	void pDelete();
+	void init();		//初期設定
+	void update();		//更新
+	void draw();		//描画
+	void HUD();			//ヘッドアップディスプレイ
+	void pDelete();		//削除
 };
 
 

@@ -39,11 +39,12 @@ public:
 	void action();				//行動（移動、攻撃
 	bool onDead();				//生存確認 true:死亡 false:生存
 	int HP;						//耐久値
+	unsigned int type;			//所属陣営
 
 private:
 	void move(float _distance, unsigned int _onAttack);		//移動
 	void attack(float _distance, unsigned int _onAttack);	//攻撃
-	unsigned int type;			//所属陣営
+	
 	glm::vec3 searchTarget();	//ターゲットの位置を確認
 	glm::vec3 color;			//描画の色
 	glm::vec3 targetPos;		//ターゲットの位置	
