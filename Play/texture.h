@@ -6,13 +6,13 @@
 #include "../glut.h"
 
 enum TEXTURE_ID 
-{
+{//読み込みテクスチャ番号
 	TITLE_BACKGROUND,
+	MARK,
 	FIELD,
 	WALL,
 	TEXTURE_MAX,
 };
-
 
 class Texture
 {
@@ -20,14 +20,13 @@ public:
 	Texture() {}
 	~Texture(){}
 
-	void read(const char* _texture);//読み込み
-	void read_alpha(const char* _texture);//読み込み（アルファ
+	void read(const char* _texture);		//読み込み
+	void read_alpha(const char* _texture);	//読み込み（アルファ変換
 
 protected:
-	//色のRGBの値
-	typedef struct { unsigned char b, g, r; }RGB;
 
-	std::vector<unsigned char>alpha; //アルファ値
+	typedef struct { unsigned char b, g, r; }RGB;	//色のRGBの値
+	std::vector<unsigned char>alpha;				//アルファ値
 
 	std::vector<float>vertex;		//位置
 	std::vector<unsigned int>index;	//番号

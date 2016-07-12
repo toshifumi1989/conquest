@@ -13,6 +13,11 @@
 /////////////////////////
 void Play::init()
 {
+	//テクスチャ読み込み---------------------------------------------------------------------
+	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::MARK]);
+	mark = new Texture();
+	mark->read_alpha("mark.bmp");
+
 	//フィールド-----------------------------------------------------------------------------
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::FIELD]);
 	field = new Field();
@@ -128,6 +133,20 @@ void Play::update()
 	{
 		(*enemyIter)->action();
 		(*enemyIter)->update();
+
+		if ((*enemyIter)->onDead())
+		{
+			//HPが0を下回ったら削除
+			enemyIter = enemy.erase(enemyIter);
+
+			//新しく生成
+			glm::vec3 centerToEnemy(rand() % 60 - 30, 4, 100);		//フィールド中心からの位置
+			float enemySize = 0.5f;									//エネミーの大きさ
+			NPC* sub = new NPC(field->center + centerToEnemy, enemySize, 180, TYPE::RED);
+			enemy.push_back(sub);
+
+			return;
+		}
 		enemyIter++;
 	}
 
@@ -172,6 +191,7 @@ void Play::update()
 
 	//カメラ---------------------------------
 	camera->update();
+
 }
 
 
@@ -240,14 +260,21 @@ void Play::draw()
 		pole[i]->draw();
 	}
 
-
+	//HUD-------------------------------------------
+	HUD();
 }
 
 /////////////////////////
 //平面描画
 /////////////////////////
-void Play::twoDimension()
+void Play::HUD()
 {
+	//カメラ設定-------------------------------------
+	camera->HUD();
+
+	//プレイヤー-------------------------------------
+	player->HUD();
+
 
 }
 

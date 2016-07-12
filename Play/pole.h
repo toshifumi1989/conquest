@@ -18,15 +18,15 @@ public:
 		pos = _pos;
 		type = _type;
 		if (_type == TYPE::NEUTRAL)
-		{
+		{//中立
 			HP = 0 ;
 		}
 		else if (_type == TYPE::BLUE)
-		{
+		{//ブルー陣営
 			HP = maxHP;
 		}
 		else
-		{
+		{//レッド陣営
 			HP = -maxHP;
 		}
 

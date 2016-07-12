@@ -10,7 +10,7 @@ std::vector< Pole* >pole;
 void Pole::recovery()
 {
 	//自陣のとき自動回復
-	const int recovery = 1;
+	const auto recovery = 1;
 	if (type == TYPE::BLUE)
 	{
 		//プレイヤー側のときの自動回復
@@ -103,10 +103,10 @@ void Pole::draw()
 
 		//HPバー---------------------------------------------------
 
-		const float height = 1;							//HPバーの高さ
-		const float playerPole = HP / 100.f;			//player側の部分
-		const float maxShow = maxHP / 100.f;			//HPバーの横の長さ
-		const float posHeight = 10.0f;					//HPバーの高さ
+		const auto height = 1;							//HPバーの高さ
+		const auto playerPole = HP / 100.f;			//player側の部分
+		const auto maxShow = maxHP / 100.f;			//HPバーの横の長さ
+		const auto posHeight = 10.0f;					//HPバーの高さ
 
 		//ビルボード行列設定--------
 		glm::mat4 view;

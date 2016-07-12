@@ -4,9 +4,11 @@
 #include "player.h"
 #include "bullet.h"
 #include "field.h"
+#include "camera.h"
+#include "texture.h"
 
 Player *player;
-Player *NPC;
+Texture *mark;
 extern bool keys[256];
 
 ///////////////////////////////////
@@ -42,8 +44,8 @@ void Player::update()
 void Player::move()
 {
 
-	const float adjustSpeed = 0.05f;		//速さの調整用変数
-	const float adjustYaw = 1.2f;			//回転速度
+	const auto adjustSpeed = 0.05f;			//速さの調整用変数
+	const auto adjustYaw = 1.2f;			//回転速度
 
 	//移動-----------------------------------
 	//縦移動
@@ -89,8 +91,8 @@ void Player::move()
 void Player::attack()
 {
 	static bool presSpace = 0;			//前のフレームでもスペースがtrueだったか確認
-	const float adjustBody = size / 2;	//体のサイズのための位置調整
-	unsigned int damage = 100;					//ダメージ
+	const auto adjustBody = size / 2;	//体のサイズのための位置調整
+	auto damage = 100;					//ダメージ
 
 
 	if (keys[' '] && presSpace == false)
@@ -107,8 +109,8 @@ void Player::attack()
 ///////////////////////////////////
 void Player::draw()
 {
-	const float adjustBody = size / 2;	//体のサイズのための位置調整
-	const char divideNum = 20;			//分割数
+	const auto adjustBody = size / 2;	//体のサイズのための位置調整
+	const auto divideNum = 20;			//分割数
 
 	glEnable(GL_DEPTH_TEST);
 	glPushMatrix();
@@ -121,4 +123,39 @@ void Player::draw()
 	glPopMatrix();
 	glDisable(GL_DEPTH_TEST);
 }
+
+/////////////////////////////
+//ヘッドアップディスプレイ
+/////////////////////////////
+void Player::HUD()
+{
+	
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::MARK]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glEnable(GL_BLEND);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glBegin(GL_QUADS);
+	{
+		glTexCoord2d(0, 1);
+		glVertex3d((camera->right / 2) - 100, (camera->top / 2) + 200 , 0);
+		glTexCoord2d(1, 1);
+		glVertex3d((camera->right / 2) + 100, (camera->top / 2) + 200 , 0);
+		glTexCoord2d(1, 0);
+		glVertex3d((camera->right / 2) + 100, (camera->top / 2) + 450, 0);
+		glTexCoord2d(0, 0);
+		glVertex3d((camera->right / 2) - 100, (camera->top / 2) + 450, 0);
+	}
+	glEnd();
+
+	glDisable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+
+}
+
 

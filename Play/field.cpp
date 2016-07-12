@@ -23,7 +23,7 @@ void Field::setup(const char* _texture)
 	fread(&bf, sizeof(BITMAPFILEHEADER), 1, pFile);
 	fread(&bi, sizeof(BITMAPINFOHEADER), 1, pFile);
 
-	int size = bi.biWidth *bi.biHeight * sizeof(RGB);
+	const auto size = bi.biWidth *bi.biHeight * sizeof(RGB);
 	pixels = (RGB*)malloc(size);
 	fread(pixels, size, 1, pFile);
 
@@ -62,10 +62,10 @@ void Field::setup(const char* _texture)
 			tex.push_back((float)z / (vtx - 1));
 
 			//ハイトマップ
-			const float ratio = (pixels[vtx * z + x].r + pixels[vtx * z + x].g + pixels[vtx * z + x].b) / 255.f;//0~1に変更
-			const float fieldHeight = 1.f;	//フィールドの高さ
+			const auto ratio = (pixels[vtx * z + x].r + pixels[vtx * z + x].g + pixels[vtx * z + x].b) / 255.f;//0~1に変更
+			const auto fieldHeight = 1.f;	//フィールドの高さ
 
-			float y = ratio * fieldHeight;
+			const auto y = ratio * fieldHeight;
 
 			//vertex
 			vertex.push_back((float)x);
@@ -117,10 +117,10 @@ void Field::draw()
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
 
-		const float *v = vertex.data();
-		const float *n = normal.data();
-		const unsigned int *ind = index.data();
-		const float *t = tex.data();
+		const auto *v = vertex.data();
+		const auto *n = normal.data();
+		const auto *ind = index.data();
+		const auto *t = tex.data();
 
 		glVertexPointer(3, GL_FLOAT, 0, v);
 		glNormalPointer(GL_FLOAT, 0, n);
@@ -145,16 +145,16 @@ void Field::draw()
 float  Field::intersect(glm::vec3 _pos)
 {
 
-	glm::vec3 orig = glm::vec3(_pos.x, -1, _pos.z);	//始点で、直線上の任意の点
-	glm::vec3 dir = glm::vec3(0, 1, 0);				//直線の向きで、直線を定義する
+	const glm::vec3 orig = glm::vec3(_pos.x, -1, _pos.z);	//始点で、直線上の任意の点
+	const glm::vec3 dir = glm::vec3(0, 1, 0);				//直線の向きで、直線を定義する
 	glm::vec3 vert0;								//以下の３点で三角形を定義
 	glm::vec3 vert1;
 	glm::vec3 vert2;
 	glm::vec3 distance = glm::vec3(0, 0, 0);		//xメンバに、始点から交差点の距離が取得される
 
-	int temporaryX = _pos.x;	//x座標の整数部分
-	int temporaryZ = _pos.z;	//z座標の整数部分
-	float nowPosY = _pos.y;		//現在のy座標
+	const int temporaryX = _pos.x;	//x座標の整数部分
+	const int temporaryZ = _pos.z;	//z座標の整数部分
+	const int nowPosY = _pos.y;		//現在のy座標
 
 	if ((_pos.x - temporaryX) + (_pos.z - temporaryZ) < 1)
 	{
@@ -202,7 +202,7 @@ bool Field::hitBullet(glm::vec3 _pos)
 
 	const int temporaryX = _pos.x;
 	const int temporaryZ = _pos.z;
-	const float nowPosY = _pos.y;
+	const int nowPosY = _pos.y;
 
 	//上の三角
 	if ((_pos.x - temporaryX) + (_pos.z - temporaryZ) < 1)

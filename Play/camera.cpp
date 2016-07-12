@@ -27,19 +27,19 @@ void Camera::update()
 {
 
 	//カメラの移動
-	const float posHeight = 2.0f;	//カメラの高さ調整用変数
-	const float distance = 7.0f;	//カメラの距離
+	const auto posHeight = 2.0f;	//カメラの高さ調整用変数
+	const auto distance = 7.0f;	//カメラの距離
 
 	pos.x = player->pos.x - sin(player->yaw * M_PI / 180) * distance;
 	pos.y = player->pos.y + posHeight;
 	pos.z = player->pos.z - cos(player->yaw * M_PI / 180) * distance;
 
 	//カメラターゲットの再設定
-	const float targetHeight = 1.0f;//ターゲット位置
+	const auto targetHeight = 1.0f;//ターゲット位置
 	target = glm::vec3(0, targetHeight, 0) + player->pos;
 
 	//カメラ補完設定
-	const float cameraSpeed = 0.2f;	//カメラ補完の速さ
+	const auto cameraSpeed = 0.2f;	//カメラ補完の速さ
 	pos = lastPos + (pos - lastPos) * cameraSpeed;
 	target = lastTarget + (target - lastTarget) * cameraSpeed;
 

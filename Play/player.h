@@ -19,15 +19,15 @@ public:
 		yaw = _yaw;
 		type = _type;
 		if (_type == TYPE::BLUE)
-		{
-			color = glm::vec3(0.2f, 0.4f, 0.7f);
+		{//ブルー陣営
+			color = glm::vec3(0.2f, 0.4f, 0.9f);
 		}
 		else if (_type == TYPE::RED)
-		{
-			color = glm::vec3(0.7f, 0.2f, 0.1f);
+		{//レッド陣営
+			color = glm::vec3(0.9f, 0.2f, 0.1f);
 		}
 		else
-		{
+		{//中立
 			color = glm::vec3(1, 1, 1);
 		}
 	}
@@ -37,6 +37,7 @@ public:
 	void draw();					//描画
 	void move();					//キャラクター移動
 	void attack();					//攻撃
+	void HUD();						//ヘッドアップディスプレイ
 
 private:
 	glm::vec3 color;				//キャラクターの色
@@ -45,5 +46,6 @@ private:
 };
 
 extern Player *player;
+extern Texture *mark;
 
 #endif

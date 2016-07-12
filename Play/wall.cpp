@@ -10,9 +10,9 @@ std::vector< Wall* >wall;
 void Wall::draw(const char _texterID)
 {
 
-	const int wallTop = 120;
-	const int wallButtom = -120;
-	const int wallHeight = 120;
+	const auto wallTop = 120;
+	const auto wallButtom = -120;
+	const auto wallHeight = 120;
 
 	glPushMatrix();
 	{

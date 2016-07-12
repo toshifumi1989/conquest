@@ -23,7 +23,7 @@ void Texture::read(const char* _texture)
 	fread(&bf, sizeof(BITMAPFILEHEADER), 1, pFile);
 	fread(&bi, sizeof(BITMAPINFOHEADER), 1, pFile);
 
-	int size = bi.biWidth *bi.biHeight * sizeof(RGB);
+	const auto size = bi.biWidth *bi.biHeight * sizeof(RGB);
 	pixels = (RGB*)malloc(size);
 	fread(pixels, size, 1, pFile);
 
@@ -78,7 +78,7 @@ void Texture::read_alpha(const char* _texture)
 	fread(&bf, sizeof(BITMAPFILEHEADER), 1, pFile);
 	fread(&bi, sizeof(BITMAPINFOHEADER), 1, pFile);
 
-	int size = bi.biWidth *bi.biHeight * sizeof(RGB);
+	const auto size = bi.biWidth *bi.biHeight * sizeof(RGB);
 	pixels = (RGB*)malloc(size);
 	fread(pixels, size, 1, pFile);
 
@@ -99,7 +99,7 @@ void Texture::read_alpha(const char* _texture)
 	//RGBÇÉAÉãÉtÉ@Ç…êÿÇËë÷Ç¶
 	for (int i = 0; i < bi.biWidth * bi.biHeight; i++)
 	{
-		int sub = (pixels[i].r + pixels[i].g + pixels[i].b) / 3;
+		const auto sub = (pixels[i].r + pixels[i].g + pixels[i].b) / 3;
 		alpha.push_back(sub);
 	}
 

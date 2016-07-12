@@ -25,8 +25,8 @@ void Bullet::update()
 ////////////////////////////////////////
 void Bullet::draw() 
 {
-	const float size = 0.1f;	//球の半径
-	const char divideNum = 20;	//球の分割数
+	const auto size = 0.1f;	//球の半径
+	const auto divideNum = 20;	//球の分割数
 
 	glEnable(GL_DEPTH_TEST);
 	glPushMatrix();
@@ -45,13 +45,13 @@ void Bullet::draw()
 bool Bullet::hitCharacter(std::list< NPC* > _character)
 {
 	//あたり判定の距離
-	const float hitDistance = 2.f;
+	const auto hitDistance = 1.f;
 
 	std::list< NPC* >::iterator iter = _character.begin();
 	while (iter != _character.end())
 	{
 		//弾とキャラクターの距離
-		const float distance =
+		const auto distance =
 			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
 			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
 
@@ -62,6 +62,8 @@ bool Bullet::hitCharacter(std::list< NPC* > _character)
 
 			return true;
 		}
+
+		iter++;
 	}
 	//当たっていないときはfalse
 	return false;
@@ -73,13 +75,13 @@ bool Bullet::hitCharacter(std::list< NPC* > _character)
 bool Bullet::hitPole()
 {
 	//あたり判定の距離
-	const float hitDistance = 4.5f;
+	const auto hitDistance = 4.5f;
 
 	//円柱の数だけ確認する
 	for (int i = 0; i < pole.size(); i++)
 	{
 		//弾と円柱の距離
-		const float bulletToPole =
+		const auto bulletToPole =
 			(pos.x - pole[i]->pos.x) * (pos.x - pole[i]->pos.x)
 			+ (pos.z - pole[i]->pos.z) * (pos.z - pole[i]->pos.z);
 		
@@ -136,6 +138,8 @@ void Bullet::exist()
 
 	//当たり判定での存在確認
 	if (
+		hitCharacter(enemy)||
+		hitCharacter(supporter)||
 		hitPole() ||				//円柱にあたっているか
 		field->hitBullet(pos) ||	//フィールドにあたっているか
 		outField())					//フィールド外にあるか

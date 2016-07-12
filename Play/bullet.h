@@ -14,7 +14,7 @@ public:
 		onExistFlag(true),
 		onCount(20)
 	{
-		const float bulletSpeed = 2.0f;
+		const auto bulletSpeed = 2.0f;	//弾の速さ
 		
 		pos = _pos;
 		yaw = _yaw;
@@ -37,7 +37,7 @@ public:
 
 private:
 	unsigned char onCount;			//残りの生存カウント
-	unsigned int damageSize;				//ダメージ量
+	unsigned int damageSize;		//ダメージ量
 	unsigned int type;				//所属陣営
 
 

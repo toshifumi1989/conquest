@@ -13,7 +13,7 @@ public:
 	void init();
 	void update();
 	void draw();
-	void twoDimension();
+	void HUD();
 	void pDelete();
 };
 

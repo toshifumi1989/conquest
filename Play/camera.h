@@ -42,7 +42,7 @@ private:
 
 	const float angle;		//表示角度
 	const float aspect;		//アスペクト
-	const  float nearDraw;		//どれくらい近くまで描画するか
+	const float nearDraw;		//どれくらい近くまで描画するか
 	const float farDraw;		//どれくらい遠くまで描画するか
 
 	glm::vec3 up;		//カメラの上の向き
