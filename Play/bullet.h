@@ -22,7 +22,7 @@ public:
 
 		type = _type;
 		damageSize = _damage;
-		onCount = damageSize / 10;
+		onCount = damageSize / 5;
 	}
 	~Bullet() {}
 

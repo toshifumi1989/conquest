@@ -13,6 +13,7 @@ class Player : public GameObject
 {
 public:
 	Player(glm::vec3 _pos,float _size,float _yaw,unsigned int _type):
+		isCharge(false),
 		chargeGauge(0),
 		maxChargeGauge(100)
 	{
@@ -42,7 +43,9 @@ public:
 	void moveLimit();				//移動制限場所の当たり判
 	bool poleCollision();			//円柱との衝突判定
 	bool NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
-	void attack();					//攻撃
+	void attackSpace();				//攻撃(キーボード
+	void attackMouse(int _button, int _state);//攻撃(マウス
+	void charge();					//isCharge:true ならチャージする
 	void HUD();						//ヘッドアップディスプレイ
 	void shootMarker();				//ショットマーカー
 	void bulletChargeGauge();		//ショットゲージ
@@ -50,9 +53,9 @@ public:
 private:
 	glm::vec3 color;				//キャラクターの色
 	unsigned int type;				//所属陣営
-
-	int chargeGauge;			//ショットチャージ量
-	const int maxChargeGauge;			//ショットゲージの最大値
+	bool isCharge;					//
+	int chargeGauge;				//ショットチャージ量
+	const int maxChargeGauge;		//ショットゲージの最大値
 };
 
 extern Player *player;

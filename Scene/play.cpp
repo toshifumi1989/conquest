@@ -119,7 +119,7 @@ void Play::update()
 	//キャラクター--------------------------------------
 	//プレイヤー
 	player->move();
-	player->attack();
+	player->attackSpace();
 	player->update();
 
 	//サポーター
