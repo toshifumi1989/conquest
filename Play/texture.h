@@ -26,7 +26,7 @@ public:
 protected:
 
 	typedef struct { unsigned char b, g, r; }RGB;	//色のRGBの値
-	std::vector<unsigned char>alpha;				//アルファ値
+	std::vector<unsigned char>alpha;//アルファ値
 
 	std::vector<float>vertex;		//位置
 	std::vector<unsigned int>index;	//番号

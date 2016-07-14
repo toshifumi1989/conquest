@@ -38,6 +38,10 @@ public:
 	void draw();				//描画
 	void action();				//行動（移動、攻撃
 	bool onDead();				//生存確認 true:死亡 false:生存
+	void playerCollision();		//プレイヤーとの当たり判定
+	void poleCollision();		//円柱との衝突判定
+	void NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
+
 	int HP;						//耐久値
 	unsigned int type;			//所属陣営
 

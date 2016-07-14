@@ -6,8 +6,8 @@
 #include "../glm/gtx/intersect.hpp"
 
 
-std::list < Bullet* > playerBullet;
-std::list < Bullet* > enemyBullet;
+std::list < Bullet* > bullet;
+
 
 ////////////////////////////////////////
 //XV

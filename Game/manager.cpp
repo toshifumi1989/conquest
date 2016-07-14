@@ -1,17 +1,17 @@
-#include "manager.h"
+#include <stdio.h>
 
+#include "manager.h"
 #include "../scene/title.h"
 #include "../scene/play.h"
 #include "../scene/result.h"
 
 
 Manager* Manager::instance = nullptr;
-extern bool keys[256];
 
 //////////////////////////////////////
 //インスタンス
 //////////////////////////////////////
-Manager* Manager::getInstance() 
+Manager* Manager::getInstance()
 {
 	if (nullptr == instance)
 	{
@@ -36,7 +36,7 @@ void Manager::update()
 void Manager::sceneTitle(float delta)
 {
 	if (_scene.getTime() == 0.0f)
-	{		
+	{
 		scene = new Title();
 		scene->init();
 	}
@@ -44,13 +44,18 @@ void Manager::sceneTitle(float delta)
 	scene->update();
 	scene->draw();
 
+	if (scene->changeScene())
+	{
+		_scene.change(&Manager::scenePlay);
+		scene->pDelete();
+	}
 
 }
 
 //////////////////////////////////////////////
 //プレイシーン
 //////////////////////////////////////////////
-void Manager::scenePlay(float delta) 
+void Manager::scenePlay(float delta)
 {
 	if (_scene.getTime() == 0.0f)
 	{
@@ -61,7 +66,11 @@ void Manager::scenePlay(float delta)
 	scene->update();
 	scene->draw();
 
-
+	if (scene->changeScene())
+	{
+		_scene.change(&Manager::sceneResult);
+		scene->pDelete();
+	}
 }
 
 /////////////////////////////////////////////
@@ -80,10 +89,9 @@ void Manager::sceneResult(float delta)
 	scene->draw();
 
 
-	if (keys[0x0d] == 1)
+	if (scene->changeScene())
 	{
 		scene->pDelete();
-		delete scene;
 		_scene.change(&Manager::sceneTitle);
 	}
 

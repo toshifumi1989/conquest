@@ -13,6 +13,7 @@ public:
 	void update();
 	void draw();
 	void pDelete();
+	bool changeScene();
 };
 
 

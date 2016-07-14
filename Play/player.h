@@ -41,8 +41,8 @@ public:
 	void draw();					//描画
 	void move();					//キャラクター移動
 	void moveLimit();				//移動制限場所の当たり判
-	bool poleCollision();			//円柱との衝突判定
-	bool NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
+	void poleCollision();			//円柱との衝突判定
+	void NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
 	void attackSpace();				//攻撃(キーボード
 	void attackMouse(int _button, int _state);//攻撃(マウス
 	void charge();					//isCharge:true ならチャージする
@@ -53,7 +53,7 @@ public:
 private:
 	glm::vec3 color;				//キャラクターの色
 	unsigned int type;				//所属陣営
-	bool isCharge;					//
+	bool isCharge;					//true:チャージ中
 	int chargeGauge;				//ショットチャージ量
 	const int maxChargeGauge;		//ショットゲージの最大値
 };

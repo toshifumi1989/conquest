@@ -6,7 +6,10 @@
 class Title :public Scene
 {
 public:
-	Title(){}
+	Title():
+		maskAlpha(0),
+		onChangeScene(false)
+	{}
 	~Title(){}
 
 
@@ -14,7 +17,11 @@ public:
 	void update();
 	void draw();
 	void pDelete();
+	bool changeScene();
 
+private:
+	float maskAlpha;		//画面を黒にするために使う変数（マスクを作るため
+	bool onChangeScene;		//プレイヤーがシーンの遷移を選択したらtrue
 };
 
 #endif

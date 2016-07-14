@@ -1,5 +1,6 @@
 #include "npc.h"
 #include "field.h"
+#include "player.h"
 #include "pole.h"
 #include "bullet.h"
 #include "../glut.h"
@@ -119,7 +120,121 @@ void NPC::move(float _distance, unsigned int _onAttack)
 
 	}
 
+	playerCollision();
+	poleCollision();
+	NPCCollision(enemy);
+	NPCCollision(supporter);
+
 }
+
+/////////////////////////////////////
+//プレイヤーとの当たり判定
+/////////////////////////////////////
+void NPC::playerCollision()
+{
+	const auto distance =
+		(pos.x - player->pos.x) * (pos.x - player->pos.x)
+		+ (pos.z - player->pos.z) * (pos.z - player->pos.z);
+
+	if (distance < 2)
+	{
+		const auto miniDot = 0.2f;					//内積の最小値
+		const auto reflection = 0.2f;				//反発率
+
+		glm::vec3 axisVec = player->pos - pos;		//衝突軸ベクトル
+		glm::normalize(axisVec);					//衝突軸の正規化
+
+		float dot = glm::dot(speed, axisVec);		//内積算出
+		if (dot < miniDot)
+		{//内積を一定より下になるのを防ぐ
+			dot = miniDot;
+		}
+
+		//反発方向へのベクトル
+		glm::vec3 outVec = reflection * dot * axisVec;
+
+		speed -= outVec;
+		pos += speed;
+	}
+}
+
+/////////////////////////////////////
+//円柱との当たり判定
+/////////////////////////////////////
+void NPC::poleCollision()
+{
+	for (int i = 0; i < pole.size(); i++)
+	{
+		const auto distance =
+			(pos.x - pole[i]->pos.x) * (pos.x - pole[i]->pos.x)
+			+ (pos.z - pole[i]->pos.z) * (pos.z - pole[i]->pos.z);
+
+		if (distance < 5)
+		{
+			const auto miniDot = 0.2f;					//内積の最小値
+			const auto reflection = 0.3f;				//反発率
+
+			glm::vec3 axisVec = pole[i]->pos - pos;		//衝突軸ベクトル
+			glm::normalize(axisVec);					//衝突軸の正規化
+
+			float dot = glm::dot(speed, axisVec);		//内積算出
+			if (dot < miniDot)
+			{//内積を一定より下になるのを防ぐ
+				dot = miniDot;
+			}
+
+			//反発方向へのベクトル
+			glm::vec3 outVec = reflection * dot * axisVec;
+
+			speed -= outVec;
+			pos += speed;
+		}
+	}
+}
+
+
+//////////////////////////////////
+//NPCとの衝突判定
+//////////////////////////////////
+void NPC::NPCCollision(std::list< NPC* > _NPC)
+{
+	std::list< NPC* >::iterator iter = _NPC.begin();
+	while (iter != _NPC.end())
+	{
+		if (*iter == this)
+		{
+			iter++;
+			continue;
+		}
+		const auto distance =
+			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
+			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
+
+		if (distance < 2)
+		{
+			const auto miniDot = 0.2f;					//内積の最小値
+			const auto reflection = 0.2f;				//反発率
+
+			glm::vec3 axisVec = (*iter)->pos - pos;		//衝突軸ベクトル
+			glm::normalize(axisVec);					//衝突軸の正規化
+
+			float dot = glm::dot(speed, axisVec);		//内積算出
+			if (dot < miniDot)
+			{//内積を一定より下になるのを防ぐ
+				dot = miniDot;
+			}
+
+			//反発方向へのベクトル
+			glm::vec3 outVec = reflection * dot * axisVec;
+
+			speed -= outVec;
+			pos += speed;
+		}
+
+		iter++;
+	}
+}
+
 
 //////////////////////////////
 //攻撃
@@ -127,6 +242,7 @@ void NPC::move(float _distance, unsigned int _onAttack)
 void NPC::attack(float _distance, unsigned int _onAttack)
 {
 	const auto damage = 200;
+	glm::vec3 correct(0, 0.5f, 0);
 
 	//0以下の時、攻撃ができる
 	if (attackCount <= 0)
@@ -134,8 +250,8 @@ void NPC::attack(float _distance, unsigned int _onAttack)
 		//攻撃可能距離の内に敵がいた場合攻撃する
 		if (_distance < _onAttack * _onAttack)
 		{	
-			Bullet* subBullet = new Bullet(pos, yaw, type, damage);
-			enemyBullet.push_back(subBullet);
+			Bullet* subBullet = new Bullet(pos + correct, yaw, type, damage);
+			bullet.push_back(subBullet);
 
 			attackCount = 60;//攻撃間隔の初期化
 		}
@@ -149,7 +265,7 @@ glm::vec3 NPC::searchTarget()
 {
 
 	auto mostNearPoleDistance = 99999;			//一番近いポールの距離を保存するための変数
-	auto poleID = 999;							//一番近いポールの番号を保存
+	auto poleID = 0;							//一番近いポールの番号を保存
 
 	//ポールの数を回す
 	for (int i = 0; i < pole.size(); i++)

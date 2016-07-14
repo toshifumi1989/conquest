@@ -74,7 +74,7 @@ void Play::init()
 	//プレイヤー
 	glm::vec3 centerToPlayer(30, 4, -100);		//フィールド中心からの位置
 	float playerSize = 0.5f;					//プレイヤーの大きさ
-	player = new Player(field->center + centerToPlayer, playerSize, 0 ,TYPE::BLUE);
+	player = new Player(field->center + centerToPlayer, playerSize, 0, TYPE::BLUE);
 
 	//サポーター
 	auto supporterNum = 3;			//サポーターの数
@@ -88,7 +88,7 @@ void Play::init()
 	}
 
 	//レッドチーム----------------------------------------------------------------
-	auto enemyNum = 4;				//エネミーの数
+	auto enemyNum = 1;				//エネミーの数
 	auto enemySize = 0.5f;			//エネミーの大きさ
 
 	for (int i = 0; i < enemyNum; i++)
@@ -155,37 +155,22 @@ void Play::update()
 	}
 
 	//弾---------------------------------------------
-	//blue
-	std::list< Bullet* >::iterator pbulletIter = playerBullet.begin();
-	while (pbulletIter != playerBullet.end())
+
+	std::list< Bullet* >::iterator bulletIter = bullet.begin();
+	while (bulletIter != bullet.end())
 	{
-		(*pbulletIter)->update();	//移動更新
-		(*pbulletIter)->exist();		//存在確認
+		(*bulletIter)->update();	//移動更新
+		(*bulletIter)->exist();		//存在確認
 
 		//もう弾が存在しないとき消去
-		if (!(*pbulletIter)->onExistFlag)
+		if (!(*bulletIter)->onExistFlag)
 		{
-			pbulletIter = playerBullet.erase(pbulletIter);
+			bulletIter = bullet.erase(bulletIter);
 			return;
 		}
-		pbulletIter++;
+		bulletIter++;
 	}
 
-	//red
-	std::list< Bullet* >::iterator ebulletIter = enemyBullet.begin();
-	while (ebulletIter != enemyBullet.end())
-	{
-		(*ebulletIter)->update();	//移動更新
-		(*ebulletIter)->exist();		//存在確認
-
-										//もう弾が存在しないとき消去
-		if (!(*ebulletIter)->onExistFlag)
-		{
-			ebulletIter = enemyBullet.erase(ebulletIter);
-			return;
-		}
-		ebulletIter++;
-	}
 	//円柱---------------------------------
 	for (int i = 0; i < pole.size(); i++)
 	{
@@ -231,21 +216,14 @@ void Play::draw()
 		enemyIter++;
 	}
 	//弾----------------------------------------------
-	//blue
-	std::list< Bullet* >::iterator pbulletIter = playerBullet.begin();
-	while (pbulletIter != playerBullet.end())
+
+	std::list< Bullet* >::iterator bulletIter = bullet.begin();
+	while (bulletIter != bullet.end())
 	{
-		(*pbulletIter)->draw();
-		pbulletIter++;
+		(*bulletIter)->draw();
+		bulletIter++;
 	}
 
-	//red
-	std::list< Bullet* >::iterator ebulletIter = enemyBullet.begin();
-	while (ebulletIter != enemyBullet.end())
-	{
-		(*ebulletIter)->draw();
-		ebulletIter++;
-	}
 
 	//フィールド（地面描画--------------------------
 	field->draw();
@@ -253,9 +231,7 @@ void Play::draw()
 	//壁描画----------------------------------------
 	for (int i = 0; i < wall.size(); i++)
 	{
-
-			wall[i]->draw(TEXTURE_ID::WALL);
-
+		wall[i]->draw(TEXTURE_ID::WALL);
 	}
 
 	//円柱------------------------------------------
@@ -287,5 +263,40 @@ void Play::HUD()
 /////////////////////////
 void Play::pDelete()
 {
+	delete player;
+	delete mark;
+	delete field;
 
+	wall.clear();
+	enemy.clear();
+	supporter.clear();
+	bullet.clear();
 }
+
+/////////////////////////////
+//シーン変更条件
+/////////////////////////////
+bool Play::changeScene()
+{
+	//現在の円柱のタイプの数を数える
+	int bluePoleCount = 0;
+	int redPoleCount = 0;
+
+	for (int i = 0; i < pole.size(); i++)
+	{//すべての円柱をタイプ別に分ける
+		if (pole[i]->type == TYPE::BLUE)
+			bluePoleCount++;
+
+		if (pole[i]->type == TYPE::RED)
+			redPoleCount++;
+	}
+
+	if (bluePoleCount == pole.size() ||
+		redPoleCount == pole.size())
+	{
+		return true;
+	}
+
+	return false;
+}
+

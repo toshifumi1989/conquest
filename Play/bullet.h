@@ -43,7 +43,7 @@ private:
 
 };
 
-extern std::list< Bullet* > playerBullet;
-extern std::list< Bullet* > enemyBullet;
+extern std::list< Bullet* > bullet;
+
 
 #endif

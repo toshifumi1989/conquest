@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "../glut.h"
+#include "../Play/player.h"
 #include "manager.h"
 #include "../Play/texture.h"
 
@@ -16,27 +17,18 @@ void keyboard(unsigned char key, int x, int y);
 void keyboardUp(unsigned char key, int x, int y);
 
 
-
-
-
 /////////////////////////////////////////////////
 //マウス
 /////////////////////////////////////////////////
 void mouse(int button, int state, int x, int y) 
 {
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) 
-	{
-
-	}
-
-
+	player->attackMouse(button, state);
 }
 
 //マウスのボタンが押された状態
 void motion(int x, int y) 
 {
 
-	glutPostRedisplay();
 }
 
 //マウスのボタンが押されていない状態
@@ -58,16 +50,6 @@ void keyboardUp(unsigned char key, int x, int y)
 	keys[key] = false;
 }
 
-void special(int key, int x, int y)
-{
-
-
-}
-
-void specialUp(int key, int x, int y)
-{
-
-}
 ////////////////////////////////////////////////////
 //タイマー関数
 ////////////////////////////////////////////////////
@@ -96,7 +78,7 @@ void init(void)
 ////////////////////////////////////////
 void display(void)
 {
-
+	system("cls");
 	Manager::getInstance()->update();
 
 	glFlush();
@@ -110,7 +92,7 @@ int main(int argc, char *argv[])
 {
 
 	glutInit(&argc, argv);
-	glutInitWindowSize(1000, 700);
+	glutInitWindowSize(1200, 840);
 	glutCreateWindow("game");
 
 	glutDisplayFunc(display);
@@ -124,8 +106,6 @@ int main(int argc, char *argv[])
 	//キーボード操作
 	glutKeyboardFunc(keyboard);
 	glutKeyboardUpFunc(keyboardUp);
-	glutSpecialFunc(special);
-	glutSpecialUpFunc(specialUp);
 
 	glutIgnoreKeyRepeat(GL_TRUE);
 

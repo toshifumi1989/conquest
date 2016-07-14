@@ -17,6 +17,8 @@ public:
 	void draw();		//描画
 	void HUD();			//ヘッドアップディスプレイ
 	void pDelete();		//削除
+	bool changeScene();	//シーン変更の条件
+
 };
 
 

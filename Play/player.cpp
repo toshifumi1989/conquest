@@ -100,25 +100,17 @@ void Player::moveLimit()
 		pos.z = lastPos.z;
 	}
 
-	/*
-	//円の当たり判定
-	if (poleCollision()||
-		NPCCollision(enemy)||
-		NPCCollision(supporter))
-	{
-		pos = lastPos;
-
-	}
-	*/
-
 	poleCollision();
+	NPCCollision(enemy);
+	NPCCollision(supporter);
+
 }
 
 
 //////////////////////////////////
 //円柱との衝突判定
 //////////////////////////////////
-bool Player::poleCollision()
+void Player::poleCollision()
 {
 	for (int i = 0; i < pole.size(); i++)
 	{
@@ -130,7 +122,7 @@ bool Player::poleCollision()
 		{
 			const auto miniDot = 0.2f;					//内積の最小値
 			const auto reflection = 0.3f;				//反発率
-			
+
 			glm::vec3 axisVec = pole[i]->pos - pos;		//衝突軸ベクトル
 			glm::normalize(axisVec);					//衝突軸の正規化
 
@@ -147,13 +139,12 @@ bool Player::poleCollision()
 			pos += speed;
 		}
 	}
-	return false;
 }
 
 //////////////////////////////////
 //NPCとの衝突判定
 //////////////////////////////////
-bool Player::NPCCollision(std::list< NPC* > _NPC)
+void Player::NPCCollision(std::list< NPC* > _NPC)
 {
 	std::list<NPC*>::iterator iter = _NPC.begin();
 	while (iter != _NPC.end())
@@ -164,14 +155,28 @@ bool Player::NPCCollision(std::list< NPC* > _NPC)
 
 		if (distance < 2)
 		{
-			return true;
+			const auto miniDot = 0.2f;					//内積の最小値
+			const auto reflection = 0.3f;				//反発率
+
+			glm::vec3 axisVec = (*iter)->pos - pos;		//衝突軸ベクトル
+			glm::normalize(axisVec);					//衝突軸の正規化
+
+			float dot = glm::dot(speed, axisVec);		//内積算出
+			if (dot < miniDot)
+			{//内積を一定より下になるのを防ぐ
+				dot = miniDot;
+			}
+
+			//反発方向へのベクトル
+			glm::vec3 outVec = reflection * dot * axisVec;
+
+			speed -= outVec;
+			pos += speed;
 		}
 
 		iter++;
 	}
-	return false;
 }
-
 
 
 //////////////////////////////////
@@ -179,7 +184,7 @@ bool Player::NPCCollision(std::list< NPC* > _NPC)
 //////////////////////////////////
 void Player::attackSpace()
 {
-	static bool presSpace = 0;					//前のフレームでもスペースがtrueだったか確認
+	static bool presSpace = false;					//前のフレームでもスペースがtrueだったか確認
 	const auto adjustBody = size / 2;			//体のサイズのための位置調整
 	const auto damage = 50 + chargeGauge * 2;	//ダメージ
 
@@ -191,8 +196,8 @@ void Player::attackSpace()
 
 	if (keys[' '] == false && presSpace == true)
 	{//スペースを離すと弾を撃つ
-		Bullet *bullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
-		playerBullet.push_back(bullet);
+		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
+		bullet.push_back(subBullet);
 		chargeGauge = 0;		//チャージ量の初期化
 		isCharge = false;
 	}
@@ -205,7 +210,7 @@ void Player::attackSpace()
 /////////////////////////////////////
 void Player::attackMouse(int _button, int _state)
 {
-	const auto adjustBody = size / 2;			//体のサイズのための位置調整
+	const auto adjustBody = size / 2;			//体のサイズのための発射位置調整
 	const auto damage = 50 + chargeGauge * 2;	//ダメージ
 
 	if (_button == GLUT_LEFT_BUTTON && _state == GLUT_DOWN)
@@ -215,16 +220,16 @@ void Player::attackMouse(int _button, int _state)
 
 	if (_button == GLUT_LEFT_BUTTON && _state == GLUT_UP)
 	{//左クリックを離すと攻撃
-		Bullet *bullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
-		playerBullet.push_back(bullet);
+		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
+		bullet.push_back(subBullet);
 		chargeGauge = 0;		//チャージ量の初期化
 		isCharge = false;
 	}
 }
 
-///////////////////////////////
+////////////////////////////////////
 // isCharge:trueならチャージする
-///////////////////////////////
+////////////////////////////////////
 void Player::charge()
 {
 	if (isCharge)
@@ -298,7 +303,7 @@ void Player::shootMarker()
 	glDisable(GL_TEXTURE_2D);
 }
 
-///////////////////////////////////
+//////////////////////////////////
 //弾のチャージゲージ
 //////////////////////////////////
 void Player::bulletChargeGauge()

@@ -3,7 +3,7 @@
 #include "../Play/texture.h"
 
 Texture *background;
-
+extern bool keys[256];
 
 ////////////////////////////////////
 //タイトル画面初期設定
@@ -26,6 +26,19 @@ void Title::init()
 //////////////////////////////////
 void Title::update()
 {
+	static bool presSpace = false;
+
+	if (keys[' '] && presSpace == false)
+	{
+		onChangeScene = true;
+	}
+	presSpace = keys[0x0d];
+
+	//マスクを濃くするためアルファ値を増やす
+	if (onChangeScene)
+	{
+		maskAlpha += 1.f / 60;
+	}
 
 }
 
@@ -59,7 +72,21 @@ void Title::draw()
 	}
 	glEnd();
 
-	//glDisable(GL_BLEND);
+	glEnable(GL_BLEND);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+	glColor4f(0, 0, 0, maskAlpha);
+	glBegin(GL_QUADS);
+	{
+		glVertex3d(0, 0, 0);
+		glVertex3d(5000, 0, 0);
+		glVertex3d(5000, 5000, 0);
+		glVertex3d(0, 5000, 0);
+	}
+	glEnd();
+
+	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 }
 
@@ -68,5 +95,22 @@ void Title::draw()
 /////////////////////////////////
 void Title::pDelete()
 {
-
+	delete background;
 }
+
+////////////////////////////////
+//シーン変更
+////////////////////////////////
+bool Title::changeScene()
+{
+
+
+
+	if (maskAlpha >= 0.8)
+	{
+		return true;
+	}
+
+	return false;
+}
+
