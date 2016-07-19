@@ -129,16 +129,9 @@ bool Bullet::outField()
 /////////////////////////////////
 void Bullet::exist()
 {
-	//残りカウントの生存確認
-	if (onCount <= 0)
-	{
-		onExistFlag = false;
-	}
-
-	//当たり判定での存在確認
-	if (
-		hitCharacter(enemy)||
-		hitCharacter(supporter)||
+	if (onCount <= 0 ||				//残りカウントの生存確認
+		hitCharacter(enemy)||		//当たり判定での存在確認
+		hitCharacter(supporter)||	//当たり判定での存在確認
 		hitPole() ||				//円柱にあたっているか
 		field->hitBullet(pos) ||	//フィールドにあたっているか
 		outField())					//フィールド外にあるか

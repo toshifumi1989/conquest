@@ -19,20 +19,14 @@ void Player::update()
 {
 	speed *= 0.9;	//減速
 
-	//移動
-	pos += speed;
-
 	//フィールドの外に出たら前のフレームの位置に戻る
 	moveLimit();
 
 	//y軸フィールドの高さ
 	pos.y = field->intersect(pos);
 
-	//チャージ
+	//攻撃のチャージをする
 	charge();
-
-	//位置の保存
-	lastPos = pos;
 }
 
 ///////////////////////////////////
@@ -81,6 +75,11 @@ void Player::move()
 		yaw -= adjustYaw;
 	}
 
+	//移動
+	pos += speed;
+
+	//位置の保存
+	lastPos = pos;
 }
 
 //////////////////////////////////
@@ -351,4 +350,12 @@ void Player::bulletChargeGauge()
 		}
 	}
 	glPopMatrix();
+}
+
+//////////////////////////////
+//プレイヤーの所属を判別する
+//////////////////////////////
+unsigned int Player::playerTypa()
+{
+	return type;
 }

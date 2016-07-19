@@ -36,11 +36,12 @@ public:
 
 	void update();				//毎フレーム更新
 	void draw();				//描画
-	void action();				//行動（移動、攻撃
+	void action(std::list< NPC* >_npc);//行動（移動、攻撃
 	bool onDead();				//生存確認 true:死亡 false:生存
 	void playerCollision();		//プレイヤーとの当たり判定
 	void poleCollision();		//円柱との衝突判定
 	void NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
+	glm::vec3 overColor();		//色を渡す
 
 	int HP;						//耐久値
 	unsigned int type;			//所属陣営
@@ -50,6 +51,7 @@ private:
 	void attack(float _distance, unsigned int _onAttack);	//攻撃
 	
 	glm::vec3 searchTarget();	//ターゲットの位置を確認
+	glm::vec3 enemyTarget(std::list< NPC* >_npc);	//敵ターゲットの位置
 	glm::vec3 color;			//描画の色
 	glm::vec3 targetPos;		//ターゲットの位置	
 	int targetID;				//ターゲットの番号

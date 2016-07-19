@@ -7,6 +7,7 @@
 #include "../Play/npc.h"
 #include "../Play/bullet.h"
 #include "../Play/pole.h"
+#include "../Play/deadEffect.h"
 
 /////////////////////////
 //初期化
@@ -72,7 +73,7 @@ void Play::init()
 
 	//ブルーチーム----------------------------------------------------------------
 	//プレイヤー
-	glm::vec3 centerToPlayer(30, 4, -100);		//フィールド中心からの位置
+	glm::vec3 centerToPlayer(45, 4, -100);		//フィールド中心からの位置
 	float playerSize = 0.5f;					//プレイヤーの大きさ
 	player = new Player(field->center + centerToPlayer, playerSize, 0, TYPE::BLUE);
 
@@ -82,18 +83,18 @@ void Play::init()
 
 	for (int i = 0; i < supporterNum; i++)
 	{
-		glm::vec3 centerToSupporter((i * 20) - 30, 4, -100);	//フィールド中心からの位置	
+		glm::vec3 centerToSupporter((i * 30) - 45, 4, -100);	//フィールド中心からの位置	
 		NPC* subSuppoter = new NPC(field->center + centerToSupporter, supporterSize, 0, TYPE::BLUE);
 		supporter.push_back(subSuppoter);
 	}
 
 	//レッドチーム----------------------------------------------------------------
-	auto enemyNum = 1;				//エネミーの数
+	auto enemyNum = 4;				//エネミーの数
 	auto enemySize = 0.5f;			//エネミーの大きさ
 
 	for (int i = 0; i < enemyNum; i++)
 	{
-		glm::vec3 centerToEnemy((i * 20) - 30, 4, 100);			//フィールド中心からの位置
+		glm::vec3 centerToEnemy((i * 30) - 45, 4, 100);			//フィールド中心からの位置
 		NPC* subEnemy = new NPC(field->center + centerToEnemy, enemySize, 180, TYPE::RED);
 		enemy.push_back(subEnemy);
 	}
@@ -117,29 +118,60 @@ void Play::init()
 void Play::update()
 {
 	//キャラクター--------------------------------------
+	//ブルー------------------------------
 	//プレイヤー
 	player->move();
 	player->attackSpace();
 	player->update();
 
+
 	//サポーター
 	std::list< NPC* >::iterator supporterIter = supporter.begin();
 	while (supporterIter != supporter.end())
 	{
-		(*supporterIter)->action();
+		(*supporterIter)->action(enemy);
 		(*supporterIter)->update();
+
+		if ((*supporterIter)->onDead())
+		{
+			//死亡エフェクト生成
+			for (int i = 0; i < 15; i++)
+			{
+				DeadEffect* deadEffe = new DeadEffect((*supporterIter)->pos, (*supporterIter)->overColor());
+				deadEffect.push_back(deadEffe);
+			}
+
+			//HPが0を下回ったら削除
+			supporterIter = supporter.erase(supporterIter);
+
+			//新しく生成
+			glm::vec3 centerToSupporter(rand() % 60 - 30, 4, -100);		//フィールド中心からの位置
+			float supporterSize = 0.5f;									//エネミーの大きさ
+			NPC* sub = new NPC(field->center + centerToSupporter, supporterSize, 180, TYPE::BLUE);
+			supporter.push_back(sub);
+
+			continue;
+		}
 		supporterIter++;
 	}
 
+	//レッド----------------------------------
 	//エネミー
 	std::list< NPC* >::iterator enemyIter = enemy.begin();
 	while (enemyIter != enemy.end())
 	{
-		(*enemyIter)->action();
+		(*enemyIter)->action(supporter);
 		(*enemyIter)->update();
 
 		if ((*enemyIter)->onDead())
 		{
+			//死亡エフェクト生成
+			for (int i = 0; i < 15; i++)
+			{
+				DeadEffect* deadEffe = new DeadEffect((*enemyIter)->pos, (*enemyIter)->overColor());
+				deadEffect.push_back(deadEffe);
+			}
+
 			//HPが0を下回ったら削除
 			enemyIter = enemy.erase(enemyIter);
 
@@ -149,7 +181,7 @@ void Play::update()
 			NPC* sub = new NPC(field->center + centerToEnemy, enemySize, 180, TYPE::RED);
 			enemy.push_back(sub);
 
-			return;
+			continue;
 		}
 		enemyIter++;
 	}
@@ -163,13 +195,27 @@ void Play::update()
 		(*bulletIter)->exist();		//存在確認
 
 		//もう弾が存在しないとき消去
-		if (!(*bulletIter)->onExistFlag)
+		if ((*bulletIter)->onExistFlag == false)
 		{
 			bulletIter = bullet.erase(bulletIter);
-			return;
+			continue;
 		}
 		bulletIter++;
 	}
+
+	//エフェクト----------------------------------
+	std::list< DeadEffect* >::iterator deadIter = deadEffect.begin();
+	while (deadIter != deadEffect.end())
+	{
+		(*deadIter)->update();
+		if ((*deadIter)->count() == 0)
+		{
+			deadIter = deadEffect.erase(deadIter);
+			continue;
+		}
+		deadIter++;
+	}
+
 
 	//円柱---------------------------------
 	for (int i = 0; i < pole.size(); i++)
@@ -216,7 +262,6 @@ void Play::draw()
 		enemyIter++;
 	}
 	//弾----------------------------------------------
-
 	std::list< Bullet* >::iterator bulletIter = bullet.begin();
 	while (bulletIter != bullet.end())
 	{
@@ -224,7 +269,13 @@ void Play::draw()
 		bulletIter++;
 	}
 
-
+	//エフェクト----------------------------------
+	std::list< DeadEffect* >::iterator deadIter = deadEffect.begin();
+	while (deadIter != deadEffect.end())
+	{
+		(*deadIter)->draw();
+		deadIter++;
+	}
 	//フィールド（地面描画--------------------------
 	field->draw();
 

@@ -16,7 +16,6 @@ Manager* Manager::getInstance()
 	if (nullptr == instance)
 	{
 		instance = new Manager();
-
 	}
 	return instance;
 }

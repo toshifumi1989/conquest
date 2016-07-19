@@ -81,7 +81,7 @@ void NPC::draw()
 /////////////////////////////////////
 //行動（移動、攻撃
 /////////////////////////////////////
-void NPC::action()
+void NPC::action(std::list< NPC* >_npc)
 {
 	//攻撃目標が制圧できた場合次の攻撃目標を探す
 	if (pole[targetID]->type == type)
@@ -89,8 +89,10 @@ void NPC::action()
 		targetPos = searchTarget();
 	}
 
+	targetPos = enemyTarget(_npc);
+
 	//敵とターゲットの距離
-	const auto enemyToTarget =
+	const auto toTarget =
 		(pos.x - targetPos.x) * (pos.x - targetPos.x)
 		+ (pos.z - targetPos.z) * (pos.z - targetPos.z);
 
@@ -99,8 +101,8 @@ void NPC::action()
 
 	yaw = atan2(targetPos.x - pos.x, targetPos.z - pos.z) * 180 / M_PI;
 
-	move(enemyToTarget, onAttack);
-	attack(enemyToTarget, onAttack);
+	move(toTarget, onAttack);
+	attack(toTarget, onAttack);
 
 }
 
@@ -253,7 +255,7 @@ void NPC::attack(float _distance, unsigned int _onAttack)
 			Bullet* subBullet = new Bullet(pos + correct, yaw, type, damage);
 			bullet.push_back(subBullet);
 
-			attackCount = 60;//攻撃間隔の初期化
+			attackCount = 40 + rand() % 20;//攻撃間隔の初期化(40～59
 		}
 	}
 }
@@ -263,7 +265,6 @@ void NPC::attack(float _distance, unsigned int _onAttack)
 //////////////////////////////
 glm::vec3 NPC::searchTarget()
 {
-
 	auto mostNearPoleDistance = 99999;			//一番近いポールの距離を保存するための変数
 	auto poleID = 0;							//一番近いポールの番号を保存
 
@@ -287,10 +288,69 @@ glm::vec3 NPC::searchTarget()
 		}
 	}
 
-
 	//一番近いポールの位置を返す
 	targetID = poleID;
 	return pole[poleID]->pos;
+
+}
+
+///////////////////////////////////////
+//敵が近くにいたときに攻撃対象にする
+///////////////////////////////////////
+glm::vec3 NPC::enemyTarget(std::list< NPC* > _npc)
+{
+	//この関数内でターゲットの変更があったか確認
+	bool changeTarget = false;
+
+	//円柱の距離
+	auto mostNearDistance =
+		(pos.x - targetPos.x) * (pos.x - targetPos.x)
+		+ (pos.z - targetPos.z) * (pos.z - targetPos.z);
+
+
+	//プレイヤーとの所属が違う場合
+	//プレイヤーがターゲットより近かったらターゲットにする
+	if (type != player->playerTypa())
+	{
+		const float toPlayerDistance = 
+			(pos.x - player->pos.x) * (pos.x - player->pos.x)
+			+ (pos.z - player->pos.z) * (pos.z - player->pos.z);
+
+		if (mostNearDistance > toPlayerDistance)
+		{
+			mostNearDistance = toPlayerDistance;
+			targetPos = player->pos;
+			changeTarget = true;
+		}
+	}
+
+	//ターゲットより近かったらターゲットにする
+	std::list< NPC* >::iterator iter = _npc.begin();
+	while (iter != _npc.end())
+	{
+		const float toNPCDistance = 
+			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
+			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
+
+		if (mostNearDistance > toNPCDistance)
+		{
+			mostNearDistance = toNPCDistance;
+			targetPos = (*iter)->pos;
+			changeTarget = true;
+		}
+
+		iter++;
+	}
+
+	if (changeTarget)
+	{//もしターゲットの変更があったときは
+		return targetPos;
+	}
+	else
+	{//ターゲット変更がなかったとき円柱のまま
+		return pole[targetID]->pos;
+	}
+
 
 }
 
@@ -309,3 +369,12 @@ bool NPC::onDead()
 		return false;
 	}
 }
+
+////////////////////////////
+//色を渡すための関数
+////////////////////////////
+glm::vec3 NPC::overColor()
+{
+	return color;
+}
+

@@ -22,7 +22,7 @@ void keyboardUp(unsigned char key, int x, int y);
 /////////////////////////////////////////////////
 void mouse(int button, int state, int x, int y) 
 {
-	player->attackMouse(button, state);
+	//player->attackMouse(button, state);
 }
 
 //マウスのボタンが押された状態

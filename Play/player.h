@@ -49,6 +49,7 @@ public:
 	void HUD();						//ヘッドアップディスプレイ
 	void shootMarker();				//ショットマーカー
 	void bulletChargeGauge();		//ショットゲージ
+	unsigned int playerTypa();		//プレイヤーの所属を判別する
 
 private:
 	glm::vec3 color;				//キャラクターの色
