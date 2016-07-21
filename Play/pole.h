@@ -37,7 +37,6 @@ public:
 	void draw();					//•`‰æ
 	void occupation();				//è—Ì‚·‚é
 
-
 	int HP;						//‰~’Œ‚Ìw‰cƒQ[ƒW
 	unsigned int type;			//Š‘®w‰c
 

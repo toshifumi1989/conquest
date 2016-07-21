@@ -1,4 +1,5 @@
 #define _USE_MATH_DEFINES
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <math.h>
 #include "player.h"
@@ -7,26 +8,22 @@
 #include "pole.h"
 #include "camera.h"
 #include "texture.h"
+#include "deadEffect.h"
+#include "time.h"
 
 Player *player;
 Texture *mark;
 extern bool keys[256];
+extern bool specialKey[256];
 
 ///////////////////////////////////
 //更新
 ///////////////////////////////////
 void Player::update()
 {
-	speed *= 0.9;	//減速
-
-	//フィールドの外に出たら前のフレームの位置に戻る
-	moveLimit();
-
-	//y軸フィールドの高さ
-	pos.y = field->intersect(pos);
-
-	//攻撃のチャージをする
-	charge();
+	move();
+	attack();
+	time->update();
 }
 
 ///////////////////////////////////
@@ -34,7 +31,7 @@ void Player::update()
 ///////////////////////////////////
 void Player::move()
 {
-
+	glm::vec3 subSpeed(0, 0, 0);				//入力で速さに追加するベクトルの置き場
 	const auto adjustSpeed = 0.05f;			//速さの調整用変数
 	const auto adjustYaw = 1.2f;			//回転速度
 
@@ -42,41 +39,59 @@ void Player::move()
 	//縦移動
 	if (keys['w'])
 	{
-		speed.x += sin(yaw * M_PI / 180) * adjustSpeed;
-		speed.z += cos(yaw * M_PI / 180) * adjustSpeed;
+		subSpeed.x += sin(yaw * M_PI / 180);
+		subSpeed.z += cos(yaw * M_PI / 180);
 	}
 	else if (keys['s'])
 	{
-		speed.x -= sin(yaw * M_PI / 180) * adjustSpeed;
-		speed.z -= cos(yaw * M_PI / 180) * adjustSpeed;
+		subSpeed.x -= sin(yaw * M_PI / 180);
+		subSpeed.z -= cos(yaw * M_PI / 180);
 	}
-
 
 	//横移動
 	if (keys['a'])
 	{
-		speed.x += cos(yaw * M_PI / 180) * adjustSpeed;
-		speed.z -= sin(yaw * M_PI / 180) * adjustSpeed;
+		subSpeed.x += cos(yaw * M_PI / 180);
+		subSpeed.z -= sin(yaw * M_PI / 180);
 	}
 	else if (keys['d'])
 	{
-		speed.x -= cos(yaw * M_PI / 180) * adjustSpeed;
-		speed.z += sin(yaw * M_PI / 180) * adjustSpeed;
+		subSpeed.x -= cos(yaw * M_PI / 180);
+		subSpeed.z += sin(yaw * M_PI / 180);
 	}
 
+	//エラーが起こるため回避
+	//	const auto length = subSpeed.length();	
+	//	if (length > 0)
+	if (subSpeed.x > 0 || subSpeed.z > 0)
+	{//複数のボタンを押したときに距離が一定になるように正規化	
+		subSpeed = glm::normalize(subSpeed);
+	}
+
+	speed.x += subSpeed.x * adjustSpeed;
+	speed.z += subSpeed.z * adjustSpeed;
 
 	//向きの変更
-	if (keys['j'])
+	if (specialKey[GLUT_KEY_LEFT])
 	{
 		yaw += adjustYaw;
 	}
-	else if (keys['l'])
+	else if (specialKey[GLUT_KEY_RIGHT])
 	{
 		yaw -= adjustYaw;
 	}
 
+	//減速
+	speed *= 0.9;
+
 	//移動
 	pos += speed;
+
+	//y軸フィールドの高さ
+	pos.y = field->intersect(pos);
+
+	//フィールドの外に出たら前のフレームの位置に戻る
+	moveLimit();
 
 	//位置の保存
 	lastPos = pos;
@@ -181,70 +196,85 @@ void Player::NPCCollision(std::list< NPC* > _NPC)
 //////////////////////////////////
 //攻撃(キーボード
 //////////////////////////////////
-void Player::attackSpace()
+void Player::attack()
 {
-	static bool presSpace = false;					//前のフレームでもスペースがtrueだったか確認
+	static bool presUp = false;					//前のフレームでもスペースがtrueだったか確認
 	const auto adjustBody = size / 2;			//体のサイズのための位置調整
-	const auto damage = 50 + chargeGauge * 2;	//ダメージ
+	const auto damage = 50 + chargeGauge * 3;	//ダメージ
 
+	//チャージ
+	if (maxChargeGauge > chargeGauge) chargeGauge++;
 
-	if (keys[' '])
-	{//スペースを押しているとチャージする
-		isCharge = true;
-	}
+	//弾ターゲット更新
+	bulletTarget();
 
-	if (keys[' '] == false && presSpace == true)
-	{//スペースを離すと弾を撃つ
-		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
-		bullet.push_back(subBullet);
-		chargeGauge = 0;		//チャージ量の初期化
-		isCharge = false;
-	}
-
-	presSpace = keys[' '];
-}
-
-/////////////////////////////////////
-//マウス
-/////////////////////////////////////
-void Player::attackMouse(int _button, int _state)
-{
-	const auto adjustBody = size / 2;			//体のサイズのための発射位置調整
-	const auto damage = 50 + chargeGauge * 2;	//ダメージ
-
-	if (_button == GLUT_LEFT_BUTTON && _state == GLUT_DOWN)
-	{//左クリックを押しているとチャージ
-		isCharge = true;
-	}
-
-	if (_button == GLUT_LEFT_BUTTON && _state == GLUT_UP)
-	{//左クリックを離すと攻撃
-		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
-		bullet.push_back(subBullet);
-		chargeGauge = 0;		//チャージ量の初期化
-		isCharge = false;
-	}
-}
-
-////////////////////////////////////
-// isCharge:trueならチャージする
-////////////////////////////////////
-void Player::charge()
-{
-	if (isCharge)
+	//↑を押すと弾を撃つ
+	if (specialKey[GLUT_KEY_UP] && presUp == false)
 	{
-		if (maxChargeGauge > chargeGauge)
-			chargeGauge++;
+		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
+		bullet.push_back(subBullet);
+		chargeGauge = 0;		//チャージ量の初期化
 	}
+
+	presUp = specialKey[GLUT_KEY_UP];
+}
+
+//////////////////////////////////////
+//弾ターゲット
+//////////////////////////////////////
+void Player::bulletTarget()
+{
+	const auto adjustBody = size / 2;			//体のサイズのための位置調整
+	glm::vec3 subTarget(0, adjustBody, 0);
+	const float bulletSpeed = 2.f;
+	const unsigned char count = (50 + chargeGauge * 3) / 5;
+
+	for (int i = 0; i < count; i++)
+	{
+		subTarget.x += sin(yaw * M_PI / 180) * bulletSpeed;
+		subTarget.z += cos(yaw * M_PI / 180) * bulletSpeed;
+	}
+
+	bulletTargetPoint = pos + subTarget;
+
 }
 
 
+/////////////////////////////////////
+//死亡確認
+////////////////////////////////////
+bool Player::isDead()
+{
+	if (HP <= 0)
+	{
+		//死亡エフェクト生成
+		for (int i = 0; i < 20; i++)
+		{
+			DeadEffect* deadEffe = new DeadEffect(pos, color);
+			deadEffect.push_back(deadEffe);
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 
+}
 
 ///////////////////////////////////
 //描画
 ///////////////////////////////////
 void Player::draw()
+{
+	bodyDraw();
+	trajectoryDraw();
+}
+
+/////////////////////////////////
+//体の描画
+/////////////////////////////////
+void Player::bodyDraw()
 {
 	const auto adjustBody = size / 2;	//体のサイズのための位置調整
 	const auto divideNum = 20;			//分割数
@@ -259,6 +289,39 @@ void Player::draw()
 	}
 	glPopMatrix();
 	glDisable(GL_DEPTH_TEST);
+
+}
+
+
+/////////////////////////////////
+//弾道描画
+/////////////////////////////////
+void Player::trajectoryDraw()
+{
+	const auto adjustBody = size / 2;	//プレイヤーの体のサイズのための位置調整
+	const auto divideNum = 20;			//分割数
+	const auto sphereSize = 0.2f;		//ターゲットの大きさ
+
+	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+	glPushMatrix();
+	{	
+		glColor4f(1, 1, 0, 0.7f);
+		glLineWidth(2);
+		glBegin(GL_LINES);
+		{
+			glVertex3f(pos.x, pos.y + adjustBody, pos.z);
+			glVertex3f(bulletTargetPoint.x, bulletTargetPoint.y, bulletTargetPoint.z);
+		}
+		glEnd();
+
+	}
+	glPopMatrix();
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
 }
 
 /////////////////////////////
@@ -266,40 +329,9 @@ void Player::draw()
 /////////////////////////////
 void Player::HUD()
 {
-	shootMarker();			//ショットマーカー
 	bulletChargeGauge();	//チャージゲージ
-}
-
-/////////////////////////////////
-//ショットマーカー
-////////////////////////////////
-void Player::shootMarker()
-{
-	glEnable(GL_TEXTURE_2D);
-
-	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::MARK]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glEnable(GL_BLEND);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glBegin(GL_QUADS);
-	{
-		glTexCoord2d(0, 1);
-		glVertex3d((camera->right / 2) - 100, (camera->top / 2) + 200, 0);
-		glTexCoord2d(1, 1);
-		glVertex3d((camera->right / 2) + 100, (camera->top / 2) + 200, 0);
-		glTexCoord2d(1, 0);
-		glVertex3d((camera->right / 2) + 100, (camera->top / 2) + 450, 0);
-		glTexCoord2d(0, 0);
-		glVertex3d((camera->right / 2) - 100, (camera->top / 2) + 450, 0);
-	}
-	glEnd();
-
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
+	HPGauge();				//HPゲージ
+	time->draw();
 }
 
 //////////////////////////////////
@@ -307,9 +339,9 @@ void Player::shootMarker()
 //////////////////////////////////
 void Player::bulletChargeGauge()
 {
-	const auto gaugeHeight = 200;
-	const auto gaugeWidth = 700;
-	const auto gaugeSize = ((float)chargeGauge / maxChargeGauge) * gaugeWidth;
+	const auto gaugeHeight = 200;	//ゲージの高さ	
+	const auto gaugeWidth = 700;	//ゲージの横幅
+	const auto gaugeSize = ((float)chargeGauge / maxChargeGauge) * gaugeWidth;//現在のチャージ量
 
 	//ゲージ表示
 	glPushMatrix();
@@ -336,7 +368,7 @@ void Player::bulletChargeGauge()
 	}
 	glPopMatrix();
 
-	//ChargeGauge文字表示
+	//文字表示
 	glPushMatrix();
 	{
 		glColor3f(1, 1, 1);	//白
@@ -352,10 +384,66 @@ void Player::bulletChargeGauge()
 	glPopMatrix();
 }
 
+/////////////////////////////////////
+//HPゲージ
+/////////////////////////////////////
+void Player::HPGauge()
+{
+	const auto gaugeHeight = 200;	//ゲージの高さ	
+	const auto gaugeWidth = 700;	//ゲージの横幅
+	const float HPrate = (float)HP / maxHP;	// 現在のHP / 最大HP
+	const auto HPsize = HPrate * gaugeWidth;//残りHPの割合
+
+//ゲージ表示
+	glPushMatrix();
+	{
+		glTranslatef(4000, 1500, 0);
+
+		glBegin(GL_QUADS);
+		{
+			//maxゲージ(下地
+			glColor3f(1, 1, 1);	//白色
+			glVertex2f(0, 0);
+			glVertex2f(gaugeWidth, 0);
+			glVertex2f(gaugeWidth, gaugeHeight);
+			glVertex2f(0, gaugeHeight);
+
+			//現在のチャージ量
+			if (HPrate > 0.5f) glColor3f(0, 1, 0);							//緑色
+			else if (0.5f >= HPrate && HPrate > 0.3f) glColor3f(1, 1, 0);	//黄色
+			else glColor3f(1, 0, 0);										//赤色
+			glVertex2f(0, 0);
+			glVertex2f(HPsize, 0);
+			glVertex2f(HPsize, gaugeHeight);
+			glVertex2f(0, gaugeHeight);
+		}
+		glEnd();
+	}
+	glPopMatrix();
+
+	//文字表示
+	glPushMatrix();
+	{
+		glColor3f(1, 1, 1);	//白
+		char word[] = "HP";
+		glTranslatef(3500, 1500, 0);
+		glScalef(1, 2, 0);
+		glLineWidth(2);
+		for (int i = 0; word[i] != 0; i++)
+		{
+			glutStrokeCharacter(GLUT_STROKE_ROMAN, word[i]);
+		}
+	}
+	glPopMatrix();
+}
+
 //////////////////////////////
 //プレイヤーの所属を判別する
 //////////////////////////////
-unsigned int Player::playerTypa()
+unsigned int Player::playerType()
 {
 	return type;
 }
+
+
+

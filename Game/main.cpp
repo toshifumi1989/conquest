@@ -6,6 +6,7 @@
 #include "../Play/texture.h"
 
 bool keys[256] = {};
+bool specialKey[256] = {};
 
 ////////////////////////////////////////////////////
 // 関数プロトタイプ（後に呼び出す関数名と引数の宣言）
@@ -15,24 +16,24 @@ void display(void);
 void timer(int value);
 void keyboard(unsigned char key, int x, int y);
 void keyboardUp(unsigned char key, int x, int y);
-
+void special(int key, int x, int y);
+void specialUp(int key, int x, int y);
 
 /////////////////////////////////////////////////
 //マウス
 /////////////////////////////////////////////////
-void mouse(int button, int state, int x, int y) 
+void mouse(int button, int state, int x, int y)
 {
-	//player->attackMouse(button, state);
+
 }
 
 //マウスのボタンが押された状態
-void motion(int x, int y) 
+void motion(int x, int y)
 {
 
 }
-
 //マウスのボタンが押されていない状態
-void passiveMotion(int x, int y) 
+void passiveMotion(int x, int y)
 {
 
 }
@@ -45,17 +46,25 @@ void keyboard(unsigned char key, int x, int y)
 {
 	keys[key] = true;
 }
-void keyboardUp(unsigned char key, int x, int y) 
+void keyboardUp(unsigned char key, int x, int y)
 {
 	keys[key] = false;
+}
+
+void special(int key, int x, int y)
+{
+	specialKey[key] = true;
+}
+void specialUp(int key, int x, int y)
+{
+	specialKey[key] = false;
 }
 
 ////////////////////////////////////////////////////
 //タイマー関数
 ////////////////////////////////////////////////////
-void timer(int value) 
+void timer(int value)
 {
-
 	glutPostRedisplay();
 
 	// 1000ミリ秒で 1 秒
@@ -66,8 +75,9 @@ void timer(int value)
 ////////////////////////////////////////////////////
 //初期設定
 ////////////////////////////////////////////////////
-void init(void) 
+void init(void)
 {
+	
 	glGenTextures(TEXTURE_ID::TEXTURE_MAX, textures);
 	//initMusic();
 }
@@ -106,6 +116,8 @@ int main(int argc, char *argv[])
 	//キーボード操作
 	glutKeyboardFunc(keyboard);
 	glutKeyboardUpFunc(keyboardUp);
+	glutSpecialFunc(special);
+	glutSpecialUpFunc(specialUp);
 
 	glutIgnoreKeyRepeat(GL_TRUE);
 

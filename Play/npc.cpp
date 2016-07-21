@@ -3,6 +3,7 @@
 #include "player.h"
 #include "pole.h"
 #include "bullet.h"
+#include "deadEffect.h"
 #include "../glut.h"
 
 std::list< NPC* >enemy;
@@ -11,14 +12,34 @@ std::list< NPC* > supporter;
 //////////////////////////
 //更新
 ///////////////////////////
-void NPC::update()
+void NPC::update(std::list< NPC* >_NPC)
 {
-	speed *= 0.9f;	//減速
-	pos += speed;	//位置の移動
 
-	pos.y = field->intersect(pos);	//y座標位置
+	//攻撃目標が制圧できた場合次の攻撃目標を探す
+	if (pole[targetID]->type == type)
+	{
+		targetPos = searchTarget();
+	}
+
+	targetPos = enemyTarget(_NPC);
+
+	//敵とターゲットの距離
+	const auto toTarget =
+		(pos.x - targetPos.x) * (pos.x - targetPos.x)
+		+ (pos.z - targetPos.z) * (pos.z - targetPos.z);
+
+	//攻撃可能距離
+	const auto onAttack = 30;
+
+	//ターゲットの方向に向く
+	yaw = atan2(targetPos.x - pos.x, targetPos.z - pos.z) * 180 / M_PI;
 
 	attackCount--;
+	stepCount--;
+
+	move(toTarget, onAttack);
+	attack(toTarget, onAttack);
+
 }
 
 
@@ -41,7 +62,7 @@ void NPC::draw()
 		const auto divideNum = 20;	//分割数
 		glutSolidSphere(size, divideNum, divideNum);
 
-		
+
 		//HPバー------------------------------------------
 		const auto height = 1;							//HPバーの高さ
 		const auto showHP = HP / 100.f;					//現在のHP
@@ -72,61 +93,57 @@ void NPC::draw()
 			glVertex3f(showMaxHP, 0, 0);
 		}
 		glEnd();
-		
+
 		glDisable(GL_DEPTH_TEST);
 	}
 	glPopMatrix();
 }
 
 /////////////////////////////////////
-//行動（移動、攻撃
-/////////////////////////////////////
-void NPC::action(std::list< NPC* >_npc)
-{
-	//攻撃目標が制圧できた場合次の攻撃目標を探す
-	if (pole[targetID]->type == type)
-	{
-		targetPos = searchTarget();
-	}
-
-	targetPos = enemyTarget(_npc);
-
-	//敵とターゲットの距離
-	const auto toTarget =
-		(pos.x - targetPos.x) * (pos.x - targetPos.x)
-		+ (pos.z - targetPos.z) * (pos.z - targetPos.z);
-
-	//攻撃可能距離
-	const auto onAttack = 30;
-
-	yaw = atan2(targetPos.x - pos.x, targetPos.z - pos.z) * 180 / M_PI;
-
-	move(toTarget, onAttack);
-	attack(toTarget, onAttack);
-
-}
-
-
-/////////////////////////////////////
 //移動
 /////////////////////////////////////
 void NPC::move(float _distance, unsigned int _onAttack)
 {
-	//攻撃できる距離まで移動する
-	if (!(_distance < _onAttack * _onAttack))
+	//攻撃可能距離にいる場合
+	if (_distance < _onAttack * _onAttack)
+	{
+		//ステップ可能になったら行動する
+		if (stepCount <= 0)
+		{
+			const float stepSpeed = 1.f;
+			if (rand() % 2 == 0)
+			{//左右に移動する(回避行動
+				speed.x += cos(yaw * M_PI / 180) * stepSpeed;
+				speed.z -= sin(yaw * M_PI / 180) * stepSpeed;
+			}
+			else
+			{
+				speed.x -= cos(yaw * M_PI / 180) * stepSpeed;
+				speed.z += sin(yaw * M_PI / 180) * stepSpeed;
+			}
+
+			stepCount = 30 + rand() % 40;//回避間隔の初期化(30～69
+		}
+	}
+	else//攻撃できる距離まで移動する
 	{
 		const auto adjustSpeed = 0.5f;
 
 		glm::vec3 targetVec(targetPos.x - pos.x, 0, targetPos.z - pos.z);
 		speed = glm::normalize(targetVec) * adjustSpeed;
-
 	}
+
+	speed *= 0.9f;	//減速
+	pos += speed;	//位置の移動
+
+	pos.y = field->intersect(pos);	//y座標位置
 
 	playerCollision();
 	poleCollision();
 	NPCCollision(enemy);
 	NPCCollision(supporter);
 
+	lastPos = pos;
 }
 
 /////////////////////////////////////
@@ -243,19 +260,21 @@ void NPC::NPCCollision(std::list< NPC* > _NPC)
 //////////////////////////////
 void NPC::attack(float _distance, unsigned int _onAttack)
 {
-	const auto damage = 200;
-	glm::vec3 correct(0, 0.5f, 0);
+	const auto damage = 100;			//ダメージ量
+	glm::vec3 correct(0, 0.5f, 0);		//補正
 
 	//0以下の時、攻撃ができる
 	if (attackCount <= 0)
 	{
 		//攻撃可能距離の内に敵がいた場合攻撃する
 		if (_distance < _onAttack * _onAttack)
-		{	
-			Bullet* subBullet = new Bullet(pos + correct, yaw, type, damage);
+		{
+
+			const float bulletYaw = yaw + (rand() % 30 - 15);
+			Bullet* subBullet = new Bullet(pos + correct, bulletYaw, type, damage);
 			bullet.push_back(subBullet);
 
-			attackCount = 40 + rand() % 20;//攻撃間隔の初期化(40～59
+			attackCount = 20 + rand() % 40;//攻撃間隔の初期化(20～59
 		}
 	}
 }
@@ -310,9 +329,9 @@ glm::vec3 NPC::enemyTarget(std::list< NPC* > _npc)
 
 	//プレイヤーとの所属が違う場合
 	//プレイヤーがターゲットより近かったらターゲットにする
-	if (type != player->playerTypa())
+	if (type != player->playerType())
 	{
-		const float toPlayerDistance = 
+		const float toPlayerDistance =
 			(pos.x - player->pos.x) * (pos.x - player->pos.x)
 			+ (pos.z - player->pos.z) * (pos.z - player->pos.z);
 
@@ -328,7 +347,7 @@ glm::vec3 NPC::enemyTarget(std::list< NPC* > _npc)
 	std::list< NPC* >::iterator iter = _npc.begin();
 	while (iter != _npc.end())
 	{
-		const float toNPCDistance = 
+		const float toNPCDistance =
 			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
 			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
 
@@ -358,23 +377,21 @@ glm::vec3 NPC::enemyTarget(std::list< NPC* > _npc)
 ////////////////////////////
 //生存の確認
 ////////////////////////////
-bool NPC::onDead()
+bool NPC::isDead()
 {
 	if (HP <= 0)
 	{
+		//死亡エフェクト生成
+		for (int i = 0; i < 20; i++)
+		{
+			DeadEffect* deadEffe = new DeadEffect(pos, color);
+			deadEffect.push_back(deadEffe);
+		}
 		return true;
 	}
 	else
 	{
 		return false;
 	}
-}
-
-////////////////////////////
-//色を渡すための関数
-////////////////////////////
-glm::vec3 NPC::overColor()
-{
-	return color;
 }
 

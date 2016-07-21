@@ -8,16 +8,15 @@
 #include "../Play/bullet.h"
 #include "../Play/pole.h"
 #include "../Play/deadEffect.h"
+#include "../Play/time.h"
 
 /////////////////////////
 //初期化
 /////////////////////////
 void Play::init()
 {
-	//テクスチャ読み込み---------------------------------------------------------------------
-	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::MARK]);
-	mark = new Texture();
-	mark->read_alpha("mark.bmp");
+	//タイム-------------------------------------------------------------------------------
+	time = new Time();
 
 	//フィールド-----------------------------------------------------------------------------
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::FIELD]);
@@ -120,27 +119,36 @@ void Play::update()
 	//キャラクター--------------------------------------
 	//ブルー------------------------------
 	//プレイヤー
-	player->move();
-	player->attackSpace();
 	player->update();
+	if (player->isDead())
+	{//HPが0を下回ったら
+		//いったん削除
+		delete player;
+
+		//新しく生成
+		glm::vec3 centerToPlayer(rand() % 60 - 30, 4, -100);		//フィールド中心からの位置
+		float playerSize = 0.5f;					//プレイヤーの大きさ
+		player = new Player(field->center + centerToPlayer, playerSize, 0, TYPE::BLUE);
+
+		//カメラの位置調整
+		const float posHeight = 2.0f;	//カメラ高さ
+		const float distance = -7.0f;	//プレイヤーとの距離
+		const float targetHeight = 1.0f;//ターゲット位置
+
+		camera->setUp(
+			player->pos + glm::vec3(0, posHeight, distance),	//カメラの初期位置
+			player->pos + glm::vec3(0, targetHeight, 0));		//ターゲット位置
+
+	}
 
 
 	//サポーター
 	std::list< NPC* >::iterator supporterIter = supporter.begin();
 	while (supporterIter != supporter.end())
 	{
-		(*supporterIter)->action(enemy);
-		(*supporterIter)->update();
-
-		if ((*supporterIter)->onDead())
+		(*supporterIter)->update(enemy);
+		if ((*supporterIter)->isDead())
 		{
-			//死亡エフェクト生成
-			for (int i = 0; i < 15; i++)
-			{
-				DeadEffect* deadEffe = new DeadEffect((*supporterIter)->pos, (*supporterIter)->overColor());
-				deadEffect.push_back(deadEffe);
-			}
-
 			//HPが0を下回ったら削除
 			supporterIter = supporter.erase(supporterIter);
 
@@ -160,18 +168,10 @@ void Play::update()
 	std::list< NPC* >::iterator enemyIter = enemy.begin();
 	while (enemyIter != enemy.end())
 	{
-		(*enemyIter)->action(supporter);
-		(*enemyIter)->update();
+		(*enemyIter)->update(supporter);
 
-		if ((*enemyIter)->onDead())
+		if ((*enemyIter)->isDead())
 		{
-			//死亡エフェクト生成
-			for (int i = 0; i < 15; i++)
-			{
-				DeadEffect* deadEffe = new DeadEffect((*enemyIter)->pos, (*enemyIter)->overColor());
-				deadEffect.push_back(deadEffe);
-			}
-
 			//HPが0を下回ったら削除
 			enemyIter = enemy.erase(enemyIter);
 
@@ -317,6 +317,7 @@ void Play::pDelete()
 	delete player;
 	delete mark;
 	delete field;
+	delete time;
 
 	wall.clear();
 	enemy.clear();
@@ -344,9 +345,12 @@ bool Play::changeScene()
 
 	if (bluePoleCount == pole.size() ||
 		redPoleCount == pole.size())
-	{
 		return true;
-	}
+
+
+	if (time->getMinutes() < 0)
+		return true;
+
 
 	return false;
 }

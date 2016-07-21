@@ -15,15 +15,16 @@ std::list < Bullet* > bullet;
 void Bullet::update()
 {
 	pos += speed;	//移動
-	onCount--;	
+	onCount--;
 }
 
 ////////////////////////////////////////
 //描画
 ////////////////////////////////////////
-void Bullet::draw() 
+void Bullet::draw()
 {
-	const auto size = 0.1f;		//球の半径
+	
+	//const auto size = 0.1f;		//球の半径
 	const auto divideNum = 20;	//球の分割数
 
 	glEnable(GL_DEPTH_TEST);
@@ -36,6 +37,33 @@ void Bullet::draw()
 	glPopMatrix();
 	glDisable(GL_DEPTH_TEST);
 }
+
+////////////////////////////////////////
+//プレイヤーとの当たり判定
+////////////////////////////////////////
+bool Bullet::hitPlayer()
+{
+	//あたり判定の距離
+	const auto hitDistance = 1.f;
+
+	//弾とキャラクターの距離
+	const auto distance =
+		(pos.x - player->pos.x) * (pos.x - player->pos.x)
+		+ (pos.z - player->pos.z) * (pos.z - player->pos.z);
+
+	if (distance <= hitDistance)
+	{//当たったとき
+
+		if (type != player->playerType())
+		{//所属が違うならダメージを受ける		
+			player->HP -= damageSize;
+		}
+		return true;
+	}
+	return false;
+}
+
+
 
 ////////////////////////////////////////
 //キャラクターとの当たり判定
@@ -74,7 +102,7 @@ bool Bullet::hitCharacter(std::list< NPC* > _character)
 bool Bullet::hitPole()
 {
 	//あたり判定の距離
-	const auto hitDistance = 4.5f;
+	const auto hitDistance = 5;
 
 	//円柱の数だけ確認する
 	for (int i = 0; i < pole.size(); i++)
@@ -83,7 +111,7 @@ bool Bullet::hitPole()
 		const auto bulletToPole =
 			(pos.x - pole[i]->pos.x) * (pos.x - pole[i]->pos.x)
 			+ (pos.z - pole[i]->pos.z) * (pos.z - pole[i]->pos.z);
-		
+
 		//円柱と当たった場合
 		if (bulletToPole <= hitDistance)
 		{
@@ -92,7 +120,7 @@ bool Bullet::hitPole()
 			{
 				if (type == TYPE::BLUE)
 				{
- 					pole[i]->HP += damageSize;
+					pole[i]->HP += damageSize;
 				}
 				else
 				{
@@ -130,8 +158,9 @@ bool Bullet::outField()
 void Bullet::exist()
 {
 	if (onCount <= 0 ||				//残りカウントの生存確認
-		hitCharacter(enemy)||		//当たり判定での存在確認
-		hitCharacter(supporter)||	//当たり判定での存在確認
+		hitPlayer()||				//プレイヤーと当たったか	
+		hitCharacter(enemy) ||		//エネミーと当たったか
+		hitCharacter(supporter) ||	//サポーターに当たったか
 		hitPole() ||				//円柱にあたっているか
 		field->hitBullet(pos) ||	//フィールドにあたっているか
 		outField())					//フィールド外にあるか
@@ -139,10 +168,6 @@ void Bullet::exist()
 		onExistFlag = false;	//もう存在しない
 	}
 }
-
-
-
-
 
 
 

@@ -10,7 +10,8 @@ public:
 	NPC(glm::vec3 _pos, float _size, float _yaw,unsigned char _type) :
 		maxHP(500),
 		HP(500),
-		attackCount(120)
+		attackCount(120),
+		stepCount(120)
 	{
 		pos = _pos;
 		lastPos = _pos;
@@ -34,14 +35,12 @@ public:
 	}
 	~NPC() {}
 
-	void update();				//毎フレーム更新
+	void update(std::list< NPC* > _NPC);//毎フレーム更新
 	void draw();				//描画
-	void action(std::list< NPC* >_npc);//行動（移動、攻撃
-	bool onDead();				//生存確認 true:死亡 false:生存
+	bool isDead();				//生存確認 true:死亡 false:生存
 	void playerCollision();		//プレイヤーとの当たり判定
 	void poleCollision();		//円柱との衝突判定
 	void NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
-	glm::vec3 overColor();		//色を渡す
 
 	int HP;						//耐久値
 	unsigned int type;			//所属陣営
@@ -56,6 +55,7 @@ private:
 	glm::vec3 targetPos;		//ターゲットの位置	
 	int targetID;				//ターゲットの番号
 	int attackCount;			//攻撃間隔のための変数
+	int stepCount;				//回避行動の間隔のための変数
 	unsigned int maxHP;			//最大耐久値
 };
 

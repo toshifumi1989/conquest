@@ -13,9 +13,11 @@ class Player : public GameObject
 {
 public:
 	Player(glm::vec3 _pos,float _size,float _yaw,unsigned int _type):
-		isCharge(false),
 		chargeGauge(0),
-		maxChargeGauge(100)
+		maxChargeGauge(50),
+		maxHP(500),
+		HP(500),
+		bulletTargetPoint(0,0,0)
 	{
 		pos = _pos;
 		lastPos = _pos;
@@ -38,25 +40,32 @@ public:
 	~Player(){}
 
 	void update();					//更新
-	void draw();					//描画
 	void move();					//キャラクター移動
 	void moveLimit();				//移動制限場所の当たり判
 	void poleCollision();			//円柱との衝突判定
 	void NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
-	void attackSpace();				//攻撃(キーボード
-	void attackMouse(int _button, int _state);//攻撃(マウス
-	void charge();					//isCharge:true ならチャージする
+	void attack();					//攻撃
+	void bulletTarget();			//弾のターゲット
+	bool isDead();					//true 死亡
+	void draw();					//描画
+	void bodyDraw();				//体の描画
+	void trajectoryDraw();			//弾道描画
+
 	void HUD();						//ヘッドアップディスプレイ
-	void shootMarker();				//ショットマーカー
 	void bulletChargeGauge();		//ショットゲージ
-	unsigned int playerTypa();		//プレイヤーの所属を判別する
+	void HPGauge();					//HPゲージ
+
+	unsigned int playerType();		//プレイヤーの所属を渡す
+
+	int HP;							//耐久値
 
 private:
 	glm::vec3 color;				//キャラクターの色
 	unsigned int type;				//所属陣営
-	bool isCharge;					//true:チャージ中
 	int chargeGauge;				//ショットチャージ量
 	const int maxChargeGauge;		//ショットゲージの最大値
+	const int maxHP;				//最大耐久値
+	glm::vec3 bulletTargetPoint;	//弾の終着点
 };
 
 extern Player *player;
