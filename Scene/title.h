@@ -2,6 +2,7 @@
 #define TITLE_H
 
 #include "scene.h"
+#include "../glm/glm.hpp"
 
 class Title :public Scene
 {
@@ -16,6 +17,9 @@ public:
 	void init();
 	void update();
 	void draw();
+	void backGround();
+	void word(int _textureID, glm::vec3 _translate);
+	void mask();
 	void pDelete();
 	bool changeScene();
 

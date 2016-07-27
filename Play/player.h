@@ -5,6 +5,7 @@
 #include "gameObject.h"
 #include "npc.h"
 #include "field.h"
+#include "wavFile.h"
 
 /////////////////////////////////////
 //プレイヤーキャラクターclass
@@ -40,26 +41,29 @@ public:
 	~Player(){}
 
 	void update();					//更新
+	void draw();					//描画
+	void HUD();						//ヘッドアップディスプレイ
+
+	unsigned int playerType();		//プレイヤーの所属を渡す
+	bool isDead();					//true 死亡
+
+	int HP;							//耐久値
+
+private:
 	void move();					//キャラクター移動
 	void moveLimit();				//移動制限場所の当たり判
 	void poleCollision();			//円柱との衝突判定
 	void NPCCollision(std::list< NPC* > _NPC);//NPCとの衝突判定
 	void attack();					//攻撃
 	void bulletTarget();			//弾のターゲット
-	bool isDead();					//true 死亡
-	void draw();					//描画
+
 	void bodyDraw();				//体の描画
 	void trajectoryDraw();			//弾道描画
 
-	void HUD();						//ヘッドアップディスプレイ
 	void bulletChargeGauge();		//ショットゲージ
 	void HPGauge();					//HPゲージ
+	void control();					//操作方法
 
-	unsigned int playerType();		//プレイヤーの所属を渡す
-
-	int HP;							//耐久値
-
-private:
 	glm::vec3 color;				//キャラクターの色
 	unsigned int type;				//所属陣営
 	int chargeGauge;				//ショットチャージ量
@@ -69,6 +73,7 @@ private:
 };
 
 extern Player *player;
-extern Texture *mark;
+extern Texture *controller;
+extern WavFile *shoot;
 
 #endif

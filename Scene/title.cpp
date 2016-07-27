@@ -1,9 +1,14 @@
 #include "title.h"
 #include "../Play/camera.h"
 #include "../Play/texture.h"
+#include "../Play/wavFile.h"
 
-Texture *background;
+Texture *titleBackground;
+Texture *titleWord;
+Texture *titleNmae;
+WavFile *click;
 extern bool keys[256];
+
 
 ////////////////////////////////////
 //タイトル画面初期設定
@@ -13,11 +18,27 @@ void Title::init()
 	//カメラ生成
 	camera = new Camera();
 
+	//bgm生成
+	bgm->playMusic(SOUND::TITLE_BGM);
+
+	//スペース押したときの音
+	click = new WavFile();
+	click->readSound("titleClick.wav",SOUND::CLICK);
+
 	//背景
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::TITLE_BACKGROUND]);
-	background = new Texture();
-	background->read("title.bmp");
+	titleBackground = new Texture();
+	titleBackground->read("title.bmp");
 
+	//文字
+	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::TITLE_SPACE]);
+	titleWord = new Texture();
+	titleWord->read_alpha("titleWord.bmp");
+
+	//タイトル名
+	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::TITLE_NAME]);
+	titleNmae = new Texture();
+	titleNmae->read_alpha("titleName.bmp");
 
 }
 
@@ -26,11 +47,19 @@ void Title::init()
 //////////////////////////////////
 void Title::update()
 {
+	//クリック音が2秒以上になったら停止する
+	if (click->timeMusic(SOUND::CLICK) > 2.0f)
+	{
+		click->stopMusic(SOUND::CLICK);
+	}
+
 	static bool presSpace = false;
 
+	//スペースを押したらシーン遷移する
 	if (keys[' '] && presSpace == false)
 	{
 		onChangeScene = true;
+		click->playMusic(SOUND::CLICK);
 	}
 	presSpace = keys[0x0d];
 
@@ -53,11 +82,31 @@ void Title::draw()
 	camera->HUD();
 
 	//タイトル画面背景
-	glEnable(GL_TEXTURE_2D);
+	backGround();
 
+	//マスク
+	mask();
+
+	//タイトル文字
+	word(TEXTURE_ID::TITLE_SPACE,glm::vec3(600,00,0));
+
+	//タイトル名
+	word(TEXTURE_ID::TITLE_NAME, glm::vec3(600, 2500, 0));
+
+
+}
+
+
+//////////////////////////////////////////////////
+//タイトル背景
+//////////////////////////////////////////////////
+void Title::backGround()
+{
+	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::TITLE_BACKGROUND]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 
 	glBegin(GL_QUADS);
 	{
@@ -72,9 +121,59 @@ void Title::draw()
 	}
 	glEnd();
 
+	glDisable(GL_TEXTURE_2D);
+
+}
+
+////////////////////////////////////////////////
+//文字
+////////////////////////////////////////////////
+void Title::word(int _textureID , glm::vec3 _translate)
+{
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+
+	glBindTexture(GL_TEXTURE_2D, textures[_textureID]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glColor4f(0, 0, 0, 1);
+	glPushMatrix();
+	{
+		glTranslatef(_translate.x, _translate.y, _translate.z);
+		glBegin(GL_QUADS);
+		{
+			glTexCoord2d(0, 1);
+			glVertex3d(0, 0, 0);
+			glTexCoord2d(1, 1);
+			glVertex3d(4000, 0, 0);
+			glTexCoord2d(1, 0);
+			glVertex3d(4000, 2000, 0);
+			glTexCoord2d(0, 0);
+			glVertex3d(0, 2000, 0);
+		}
+		glEnd();
+	}
+	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+}
+
+
+
+//////////////////////////////////////
+//マスク
+//////////////////////////////////////
+void Title::mask()
+{
+	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glColor4f(0, 0, 0, maskAlpha);
 	glBegin(GL_QUADS);
@@ -88,14 +187,24 @@ void Title::draw()
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
+
 }
+
 
 /////////////////////////////////
 //削除
 /////////////////////////////////
 void Title::pDelete()
 {
-	delete background;
+	delete titleBackground;
+	delete titleWord;
+
+	bgm->stopMusic(SOUND::TITLE_BGM);
+	//bgm->deleteMusic();
+	//delete bgm;
+	click->stopMusic(SOUND::CLICK);
+	click->deleteMusic();
+	delete click;
 }
 
 ////////////////////////////////
@@ -104,9 +213,7 @@ void Title::pDelete()
 bool Title::changeScene()
 {
 
-
-
-	if (maskAlpha >= 0.8)
+	if (maskAlpha >= 0.9)
 	{
 		return true;
 	}

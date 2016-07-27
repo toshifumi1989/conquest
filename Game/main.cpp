@@ -4,6 +4,7 @@
 #include "../Play/player.h"
 #include "manager.h"
 #include "../Play/texture.h"
+#include "../Play/wavFile.h"
 
 bool keys[256] = {};
 bool specialKey[256] = {};
@@ -79,7 +80,7 @@ void init(void)
 {
 	
 	glGenTextures(TEXTURE_ID::TEXTURE_MAX, textures);
-	//initMusic();
+	initMusic();
 }
 
 

@@ -13,7 +13,7 @@ void Time::update()
 	//frame += 100 / 60.0f;
 
 	//----------------------------
-	/*
+	/*‰ÁŽZ‚³‚ê‚Ä‚¢‚­
 	millisecond = frame % 60;
 
 	if (rest % 60 == 0)
@@ -26,8 +26,9 @@ void Time::update()
 		seconds = 0;
 		minutes++;
 	}
-	*/
 	//-----------------------------
+	*/
+	//Œ¸ŽZ‚³‚ê‚Ä‚¢‚­
 	const auto count = rest - frame;
 
 
@@ -52,8 +53,20 @@ void Time::draw()
 
 	glPushMatrix();
 	{
-		glTranslatef(2000, 4000, 0);
+		glTranslatef(500, 4000, 0);
+
 		glColor3f(0, 0, 0);
+		glBegin(GL_QUADS);
+		{
+			glVertex2f(0, 0);
+			glVertex2f(1200, 0);
+			glVertex2f(1200, 500);
+			glVertex2f(0, 500);
+		}
+		glEnd();
+
+		glTranslatef(100, 100, 0);
+		glColor3f(1, 1, 1);
 		char min[6];
 		sprintf_s(min, "%.2d.", minutes);
 		glScalef(3, 3, 0);

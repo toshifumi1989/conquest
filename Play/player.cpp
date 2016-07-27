@@ -12,7 +12,8 @@
 #include "time.h"
 
 Player *player;
-Texture *mark;
+Texture *controller;
+WavFile *shoot;
 extern bool keys[256];
 extern bool specialKey[256];
 
@@ -214,6 +215,12 @@ void Player::attack()
 		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
 		bullet.push_back(subBullet);
 		chargeGauge = 0;		//チャージ量の初期化
+		shoot->playMusic(SOUND::SHOOT);
+	}
+
+	if (shoot->timeMusic(SOUND::SHOOT) > 1.f)
+	{
+		shoot->stopMusic(SOUND::SHOOT);
 	}
 
 	presUp = specialKey[GLUT_KEY_UP];
@@ -308,7 +315,7 @@ void Player::trajectoryDraw()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	glPushMatrix();
-	{	
+	{
 		glColor4f(1, 1, 0, 0.7f);
 		glLineWidth(2);
 		glBegin(GL_LINES);
@@ -331,7 +338,8 @@ void Player::HUD()
 {
 	bulletChargeGauge();	//チャージゲージ
 	HPGauge();				//HPゲージ
-	time->draw();
+	control();				//操作方法
+	time->draw();			//残り時間
 }
 
 //////////////////////////////////
@@ -435,6 +443,45 @@ void Player::HPGauge()
 		}
 	}
 	glPopMatrix();
+}
+
+//////////////////////////////////////
+//操作方法
+//////////////////////////////////////
+void Player::control()
+{
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+
+	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::CONTROLLER]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glColor4f(0, 0, 0, 1);
+	glPushMatrix();
+	{
+		glTranslatef(100,100, 0);
+		glBegin(GL_QUADS);
+		{
+			glTexCoord2d(0, 1);
+			glVertex3d(0, 0, 0);
+			glTexCoord2d(1, 1);
+			glVertex3d(1000, 0, 0);
+			glTexCoord2d(1, 0);
+			glVertex3d(1000, 1000, 0);
+			glTexCoord2d(0, 0);
+			glVertex3d(0, 1000, 0);
+		}
+		glEnd();
+	}
+	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+
 }
 
 //////////////////////////////

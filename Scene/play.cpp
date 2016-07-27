@@ -18,6 +18,12 @@ void Play::init()
 	//タイム-------------------------------------------------------------------------------
 	time = new Time();
 
+	//音-----------------------------------------------------------------------------------
+	bgm->playMusic(SOUND::PLAY_BGM);
+
+	shoot = new WavFile();
+	shoot->readSound("shoot.wav", SOUND::SHOOT);
+
 	//フィールド-----------------------------------------------------------------------------
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::FIELD]);
 	field = new Field();
@@ -28,19 +34,19 @@ void Play::init()
 
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::WALL]);
 
-	Wall *northWall = new Wall(glm::vec3(field->center.x, 0, field->center.z + fieldToDistance), 0);	//z100の壁
+	Wall *northWall = new Wall(glm::vec3(field->center.x, 0, field->center.z + fieldToDistance), 0);	//z+120の壁
 	northWall->read("wall.bmp");
 	wall.push_back(northWall);
 
-	Wall *southWall = new Wall(glm::vec3(field->center.x, 0, field->center.z - fieldToDistance), 0);	//z-100の壁
+	Wall *southWall = new Wall(glm::vec3(field->center.x, 0, field->center.z - fieldToDistance), 0);	//z-120の壁
 	southWall->read("wall.bmp");
 	wall.push_back(southWall);
 
-	Wall *eastWall = new Wall(glm::vec3(field->center.x + fieldToDistance, 0, field->center.z), 90);		//x100の壁
+	Wall *eastWall = new Wall(glm::vec3(field->center.x + fieldToDistance, 0, field->center.z), 90);	//x+120の壁
 	eastWall->read("wall.bmp");
 	wall.push_back(eastWall);
 
-	Wall *westWall = new Wall(glm::vec3(field->center.x - fieldToDistance, 0, field->center.z), 90);	//z-100の壁
+	Wall *westWall = new Wall(glm::vec3(field->center.x - fieldToDistance, 0, field->center.z), 90);	//z-120の壁
 	westWall->read("wall.bmp");
 	wall.push_back(westWall);
 
@@ -75,6 +81,11 @@ void Play::init()
 	glm::vec3 centerToPlayer(45, 4, -100);		//フィールド中心からの位置
 	float playerSize = 0.5f;					//プレイヤーの大きさ
 	player = new Player(field->center + centerToPlayer, playerSize, 0, TYPE::BLUE);
+	
+	//コントローラー
+	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::CONTROLLER]);
+	controller = new Texture();
+	controller->read_alpha("controller.bmp");
 
 	//サポーター
 	auto supporterNum = 3;			//サポーターの数
@@ -315,7 +326,7 @@ void Play::HUD()
 void Play::pDelete()
 {
 	delete player;
-	delete mark;
+	delete controller;
 	delete field;
 	delete time;
 
@@ -323,6 +334,10 @@ void Play::pDelete()
 	enemy.clear();
 	supporter.clear();
 	bullet.clear();
+
+	bgm->deleteMusic();
+	shoot->deleteMusic();
+	delete shoot;
 }
 
 /////////////////////////////
