@@ -9,6 +9,7 @@
 bool keys[256] = {};
 bool prevkeys[256] = {};
 bool specialKey[256] = {};
+bool prevSpecialkey[256] = {};
 
 ////////////////////////////////////////////////////
 // 関数プロトタイプ（後に呼び出す関数名と引数の宣言）
@@ -89,15 +90,15 @@ void init(void)
 ////////////////////////////////////////
 void display(void)
 {
-	system("cls");
 	Manager::getInstance()->update();
 
 	for (int i = 0; i < 256; i++)
 	{
 		prevkeys[i] = keys[i];
+		prevSpecialkey[i] = specialKey[i];
 	}
 
-	printf("%d", prevkeys[0x0d]);
+	printf("key[ %d  :  %d ]\n",keys[0x0d] ,prevkeys[0x0d]);
 	glFlush();
 }
 

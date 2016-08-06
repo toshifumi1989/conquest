@@ -194,5 +194,6 @@ bool Result::changeScene()
 		return true;
 	}
 
+	return false;
 }
 

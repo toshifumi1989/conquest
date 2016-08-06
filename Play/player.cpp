@@ -15,7 +15,9 @@
 Player *player;
 Texture *controller;
 extern bool keys[256];
+extern bool prevkeys[256];
 extern bool specialKey[256];
+extern bool prevSpecialkey[256];
 
 ///////////////////////////////////
 //更新
@@ -199,7 +201,6 @@ void Player::NPCCollision(std::list< NPC* > _NPC)
 //////////////////////////////////
 void Player::attack()
 {
-	static bool presUp = false;					//前のフレームでもスペースがtrueだったか確認
 	const auto adjustBody = size / 2;			//体のサイズのための位置調整
 	const auto damage = 10 + chargeGauge * 5;	//ダメージ
 
@@ -210,7 +211,7 @@ void Player::attack()
 	bulletTarget();
 
 	//↑を押すと弾を撃つ
-	if (specialKey[GLUT_KEY_UP] && presUp == false)
+	if (specialKey[GLUT_KEY_UP] && prevSpecialkey[GLUT_KEY_UP] == false)
 	{
 		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
 		bullet.push_back(subBullet);
@@ -218,7 +219,6 @@ void Player::attack()
 		sound->playMusic(SOUND::SHOOT);
 	}
 
-	presUp = specialKey[GLUT_KEY_UP];
 }
 
 //////////////////////////////////////
