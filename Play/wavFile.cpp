@@ -11,8 +11,12 @@ ALCcontext *context;
 ALCuint bid[SOUND::SOUND_MAX];
 ALuint sid[SOUND::SOUND_MAX];
 
-WavFile *bgm;
+WavFile *sound;
 
+
+/////////////////////////////
+//OpenAL 使用初期設定
+/////////////////////////////
 void initMusic()
 {
 	device = alcOpenDevice(NULL);//const ALCchar *devicename
@@ -35,18 +39,24 @@ void initMusic()
 	alGenSources(SOUND::SOUND_MAX, sid);
 	assert(alGetError() == AL_NO_ERROR);
 
-	bgm = new WavFile();
-	//bgm->readSound("title.wav", SOUND::TITLE_BGM);
-	bgm->readSound("title.wav", SOUND::TITLE_BGM);
-	bgm->readSound("play.wav", SOUND::PLAY_BGM);
-	//bgm->readSound("battle.wav", BGM::BATTLE_BGM);
-
+	sound = new WavFile();
+	sound->readSound("title.wav", SOUND::TITLE_BGM);
+	sound->readSound("titleClick.wav", SOUND::CLICK);
+	sound->readSound("play.wav", SOUND::PLAY_BGM);
+	sound->readSound("shoot.wav", SOUND::SHOOT);
+	sound->readSound("dead.wav", SOUND::ISDEAD);
+	sound->readSound("result.wav", SOUND::RESULT_BGM);
 }
 
+
+////////////////////////////////////////////
+//wavファイル読み込み
+////////////////////////////////////////////
 void WavFile::readSound(const char* music, unsigned char sound)
 {
 
 	FILE *pFile = fopen(music, "rb");
+	assert(pFile != NULL);
 
 	WavFile wavfile;
 
@@ -90,6 +100,8 @@ void WavFile::readSound(const char* music, unsigned char sound)
 
 	alSourcei(sid[sound], AL_LOOPING, AL_TRUE);
 	assert(alGetError() == AL_NO_ERROR);
+
+	free(data);
 
 }
 
@@ -137,5 +149,22 @@ void WavFile::stopMusic(unsigned char sound)
 {
 
 	alSourceStop(sid[sound]);	// ALuint source
+
+}
+
+///////////////////////////////////
+//playシーン時停止判定
+///////////////////////////////////
+void WavFile::playSceneStopMusic()
+{
+	if (sound->timeMusic(SOUND::SHOOT) > 1.f)
+	{
+		sound->stopMusic(SOUND::SHOOT);
+	}
+
+	if (sound->timeMusic(SOUND::ISDEAD) > 2.f)
+	{
+		sound->stopMusic(SOUND::ISDEAD);
+	}
 
 }

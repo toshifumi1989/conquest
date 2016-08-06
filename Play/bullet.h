@@ -27,17 +27,19 @@ public:
 	}
 	~Bullet() {}
 
-	void draw();
-	void update();
-	bool hitPlayer();
-	bool hitCharacter(std::list< NPC* > _character);
-	bool hitPole();
-	bool outField();
-	void exist();
+	void draw();					//描画
+	void update();					//毎フレーム更新
+
+	void exist();					//弾の生存確認
 
 	bool onExistFlag;				//存在しているか true:まだ存在する false:すでにない
 
 private:
+	bool hitPlayer();				//プレイヤーに当たったか
+	bool hitCharacter(std::list< NPC* > _character);//NPCに当たったか
+	bool hitPole();					//円柱に当たったか
+	bool outField();				//フィールド外に出たか
+
 	char onCount;					//残りの生存カウント
 	unsigned int damageSize;		//ダメージ量
 	unsigned int type;				//所属陣営

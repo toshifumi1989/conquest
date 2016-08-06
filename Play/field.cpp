@@ -63,9 +63,10 @@ void Field::setup(const char* _texture)
 
 			//ハイトマップ
 			const auto ratio = (pixels[vtx * z + x].r + pixels[vtx * z + x].g + pixels[vtx * z + x].b) / 255.f;//0~1に変更
-			const auto fieldHeight = 1.f;	//フィールドの高さ
+			const auto fieldHeight = 0;	//フィールドの高さ上限
 
 			const auto y = ratio * fieldHeight;
+
 
 			//vertex
 			vertex.push_back((float)x);
@@ -105,7 +106,7 @@ void Field::draw()
 	glEnable(GL_DEPTH_TEST);
 	glPushMatrix();
 	{
-		glColor3f(1, 1, 1);
+		glColor3f(1, .5, 0);
 
 		glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::FIELD]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

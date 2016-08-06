@@ -12,6 +12,7 @@ public:
 	Play(){}
 	~Play() {}
 
+private:
 	void init();		//‰Šúİ’è
 	void update();		//XV
 	void draw();		//•`‰æ

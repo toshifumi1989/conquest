@@ -10,10 +10,10 @@
 #include "texture.h"
 #include "deadEffect.h"
 #include "time.h"
+#include "wavFile.h"
 
 Player *player;
 Texture *controller;
-WavFile *shoot;
 extern bool keys[256];
 extern bool specialKey[256];
 
@@ -201,7 +201,7 @@ void Player::attack()
 {
 	static bool presUp = false;					//前のフレームでもスペースがtrueだったか確認
 	const auto adjustBody = size / 2;			//体のサイズのための位置調整
-	const auto damage = 50 + chargeGauge * 3;	//ダメージ
+	const auto damage = 10 + chargeGauge * 5;	//ダメージ
 
 	//チャージ
 	if (maxChargeGauge > chargeGauge) chargeGauge++;
@@ -215,12 +215,7 @@ void Player::attack()
 		Bullet *subBullet = new Bullet(pos + glm::vec3(0, adjustBody, 0), yaw, type, damage);
 		bullet.push_back(subBullet);
 		chargeGauge = 0;		//チャージ量の初期化
-		shoot->playMusic(SOUND::SHOOT);
-	}
-
-	if (shoot->timeMusic(SOUND::SHOOT) > 1.f)
-	{
-		shoot->stopMusic(SOUND::SHOOT);
+		sound->playMusic(SOUND::SHOOT);
 	}
 
 	presUp = specialKey[GLUT_KEY_UP];
@@ -259,6 +254,8 @@ bool Player::isDead()
 		{
 			DeadEffect* deadEffe = new DeadEffect(pos, color);
 			deadEffect.push_back(deadEffe);
+
+			sound->playMusic(SOUND::ISDEAD);
 		}
 		return true;
 	}
@@ -340,6 +337,7 @@ void Player::HUD()
 	HPGauge();				//HPゲージ
 	control();				//操作方法
 	time->draw();			//残り時間
+	map();
 }
 
 //////////////////////////////////
@@ -354,7 +352,7 @@ void Player::bulletChargeGauge()
 	//ゲージ表示
 	glPushMatrix();
 	{
-		glTranslatef(4000, 1000, 0);
+		glTranslatef(4000, 700, 0);
 
 		glBegin(GL_QUADS);
 		{
@@ -381,7 +379,7 @@ void Player::bulletChargeGauge()
 	{
 		glColor3f(1, 1, 1);	//白
 		char word[] = "ChargeGauge";
-		glTranslatef(3200, 1000, 0);
+		glTranslatef(3200, 700, 0);
 		glScalef(1, 2, 0);
 		glLineWidth(2);
 		for (int i = 0; word[i] != 0; i++)
@@ -405,7 +403,7 @@ void Player::HPGauge()
 //ゲージ表示
 	glPushMatrix();
 	{
-		glTranslatef(4000, 1500, 0);
+		glTranslatef(4000, 1200, 0);
 
 		glBegin(GL_QUADS);
 		{
@@ -434,7 +432,7 @@ void Player::HPGauge()
 	{
 		glColor3f(1, 1, 1);	//白
 		char word[] = "HP";
-		glTranslatef(3500, 1500, 0);
+		glTranslatef(3500, 1200, 0);
 		glScalef(1, 2, 0);
 		glLineWidth(2);
 		for (int i = 0; word[i] != 0; i++)
@@ -460,20 +458,20 @@ void Player::control()
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glColor4f(0, 0, 0, 1);
+	glColor4f(1, 1, 1, 1);
 	glPushMatrix();
 	{
-		glTranslatef(100,100, 0);
+		glTranslatef(500,300, 0);
 		glBegin(GL_QUADS);
 		{
 			glTexCoord2d(0, 1);
 			glVertex3d(0, 0, 0);
 			glTexCoord2d(1, 1);
-			glVertex3d(1000, 0, 0);
+			glVertex3d(1500, 0, 0);
 			glTexCoord2d(1, 0);
-			glVertex3d(1000, 1000, 0);
+			glVertex3d(1500, 1500, 0);
 			glTexCoord2d(0, 0);
-			glVertex3d(0, 1000, 0);
+			glVertex3d(0, 1500, 0);
 		}
 		glEnd();
 	}
@@ -483,6 +481,70 @@ void Player::control()
 	glDisable(GL_BLEND);
 
 }
+
+///////////////////////////////////
+//ミニマップ
+///////////////////////////////////
+void Player::map()
+{
+	const auto height = 1500;	//ゲージの高さ	
+	const auto width = 1500;	//ゲージの横幅
+
+	glEnable(GL_BLEND);
+
+	glPushMatrix();
+	{
+		glTranslatef(3300, 3300, 0);
+
+		//下地の白-------------------------------
+		glColor4f(1, 1, 1, 0.2f);
+		glBegin(GL_QUADS);
+		{
+			glVertex2f(0, 0);
+			glVertex2f(width, 0);
+			glVertex2f(width, height);
+			glVertex2f(0, height);
+		}
+		glEnd();
+
+		//円柱------------------------------------
+		for (int y = 0; y < 3; y++)
+		{
+			for (int x = 0; x < 3; x++)
+			{
+				const auto poleToPole = width / 4;	//円柱と円柱の幅
+
+				glPushMatrix();
+				{
+					glTranslatef((3 - x) * poleToPole, (y + 1) * poleToPole, 0);
+
+					const char poleCount = x + (y * 3);	//円柱番号
+
+					if (pole[poleCount]->type == TYPE::BLUE)
+						glColor3f(0, 0, 1);
+					else if (pole[poleCount]->type == TYPE::RED)
+						glColor3f(1, 0, 0);
+					else
+						glColor3f(1, 1, 1);
+
+					glBegin(GL_QUADS);
+					{
+						glVertex2f(-100, -100);
+						glVertex2f(100, -100);
+						glVertex2f(100, 100);
+						glVertex2f(-100, 100);
+					}
+					glEnd();
+				}
+				glPopMatrix();
+			}
+		}
+	}
+	glPopMatrix();
+
+	glDisable(GL_BLEND);
+}
+
 
 //////////////////////////////
 //プレイヤーの所属を判別する

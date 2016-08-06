@@ -9,20 +9,19 @@
 #include "../Play/pole.h"
 #include "../Play/deadEffect.h"
 #include "../Play/time.h"
+#include "../Play/wavFile.h"
+
 
 /////////////////////////
 //初期化
 /////////////////////////
 void Play::init()
 {
-	//タイム-------------------------------------------------------------------------------
+	//タイム---------------------------------------------------------------------------------
 	time = new Time();
 
-	//音-----------------------------------------------------------------------------------
-	bgm->playMusic(SOUND::PLAY_BGM);
-
-	shoot = new WavFile();
-	shoot->readSound("shoot.wav", SOUND::SHOOT);
+	//BGM再生-------------------------------------------------------------------------------------
+	sound->playMusic(SOUND::PLAY_BGM);
 
 	//フィールド-----------------------------------------------------------------------------
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::FIELD]);
@@ -149,9 +148,7 @@ void Play::update()
 		camera->setUp(
 			player->pos + glm::vec3(0, posHeight, distance),	//カメラの初期位置
 			player->pos + glm::vec3(0, targetHeight, 0));		//ターゲット位置
-
 	}
-
 
 	//サポーター
 	std::list< NPC* >::iterator supporterIter = supporter.begin();
@@ -234,6 +231,9 @@ void Play::update()
 		pole[i]->occupation();
 		pole[i]->recovery();
 	}
+
+	//音楽の停止確認------------------------
+	sound->playSceneStopMusic();
 
 	//カメラ---------------------------------
 	camera->update();
@@ -335,9 +335,9 @@ void Play::pDelete()
 	supporter.clear();
 	bullet.clear();
 
-	bgm->deleteMusic();
-	shoot->deleteMusic();
-	delete shoot;
+	sound->stopMusic(SOUND::PLAY_BGM);
+	sound->stopMusic(SOUND::SHOOT);
+	sound->stopMusic(SOUND::ISDEAD);
 }
 
 /////////////////////////////

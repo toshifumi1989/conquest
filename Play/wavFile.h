@@ -13,6 +13,9 @@ enum SOUND
 
 	PLAY_BGM,
 	SHOOT,
+	ISDEAD,
+
+	RESULT_BGM,
 
 	SOUND_MAX
 };
@@ -22,20 +25,20 @@ extern ALCcontext *context;
 extern ALCuint bid[SOUND::SOUND_MAX];
 extern ALuint sid[SOUND::SOUND_MAX];
 
-
-
 class WavFile 
 {
 public:
 	WavFile(){}
 	~WavFile() {}
 
-	void readSound(const char* music ,unsigned char sound);
-	void playMusic(unsigned char sound);
-	void deleteMusic();
-	const float timeMusic(unsigned char sound);
-	void stopMusic(unsigned char sound);
+	void readSound(const char* music ,unsigned char sound);//wavFile読み込み
+	void playMusic(unsigned char sound);			//音再生
+	void deleteMusic();								//データ削除
+	const float timeMusic(unsigned char sound);		//再生時間を渡す
+	void stopMusic(unsigned char sound);			//音停止
+	void playSceneStopMusic();						//playシーン時の音停止管理
 
+private:
 	char fileID[4];//ファイル識別子
 	int fileSize;//ファイルのサイズ
 	char RIFFID[4];//RIFF識別子
@@ -54,7 +57,7 @@ public:
 
 };
 
-extern WavFile *bgm;
+extern WavFile *sound;
 extern void initMusic();
 
 #endif

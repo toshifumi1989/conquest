@@ -10,13 +10,14 @@ public:
 	Result(){}
 	~Result(){}
 
-	void init();
-	void update();
-	void draw();
-	void background();
-	void word(int _textureID, glm::vec3 _translate);
-	void pDelete();
-	bool changeScene();
+private:
+	void init();			//‰Šúİ’è
+	void update();			//–ˆƒtƒŒ[ƒ€XV
+	void draw();			//•`‰æ
+	void background();		//•`‰æ”wŒi
+	void word(int _textureID, glm::vec3 _translate);//•`‰æ•¶š
+	void pDelete();			//íœ
+	bool changeScene();		//ƒV[ƒ“Ø‚è‘Ö‚¦
 };
 
 

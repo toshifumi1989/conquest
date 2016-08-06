@@ -5,6 +5,7 @@
 #include "bullet.h"
 #include "deadEffect.h"
 #include "../glut.h"
+#include "wavFile.h"
 
 std::list< NPC* >enemy;
 std::list< NPC* > supporter;
@@ -260,7 +261,7 @@ void NPC::NPCCollision(std::list< NPC* > _NPC)
 //////////////////////////////
 void NPC::attack(float _distance, unsigned int _onAttack)
 {
-	const auto damage = 100;			//ダメージ量
+	const auto damage = 150;			//ダメージ量
 	glm::vec3 correct(0, 0.5f, 0);		//補正
 
 	//0以下の時、攻撃ができる
@@ -386,6 +387,8 @@ bool NPC::isDead()
 		{
 			DeadEffect* deadEffe = new DeadEffect(pos, color);
 			deadEffect.push_back(deadEffe);
+
+			sound->playMusic(SOUND::ISDEAD);
 		}
 		return true;
 	}

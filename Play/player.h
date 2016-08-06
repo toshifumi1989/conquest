@@ -5,7 +5,6 @@
 #include "gameObject.h"
 #include "npc.h"
 #include "field.h"
-#include "wavFile.h"
 
 /////////////////////////////////////
 //プレイヤーキャラクターclass
@@ -63,6 +62,7 @@ private:
 	void bulletChargeGauge();		//ショットゲージ
 	void HPGauge();					//HPゲージ
 	void control();					//操作方法
+	void map();						//ミニマップ
 
 	glm::vec3 color;				//キャラクターの色
 	unsigned int type;				//所属陣営
@@ -74,6 +74,5 @@ private:
 
 extern Player *player;
 extern Texture *controller;
-extern WavFile *shoot;
 
 #endif

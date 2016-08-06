@@ -7,6 +7,7 @@
 #include "../Play/wavFile.h"
 
 bool keys[256] = {};
+bool prevkeys[256] = {};
 bool specialKey[256] = {};
 
 ////////////////////////////////////////////////////
@@ -78,7 +79,6 @@ void timer(int value)
 ////////////////////////////////////////////////////
 void init(void)
 {
-	
 	glGenTextures(TEXTURE_ID::TEXTURE_MAX, textures);
 	initMusic();
 }
@@ -92,6 +92,12 @@ void display(void)
 	system("cls");
 	Manager::getInstance()->update();
 
+	for (int i = 0; i < 256; i++)
+	{
+		prevkeys[i] = keys[i];
+	}
+
+	printf("%d", prevkeys[0x0d]);
 	glFlush();
 }
 

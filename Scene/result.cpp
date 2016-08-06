@@ -8,12 +8,16 @@
 Texture *result;
 Texture *resultWord;
 extern bool keys[256];
+extern bool prevkeys[256];
 
 //////////////////////////
 //初期設定
 //////////////////////////
 void Result::init()
 {
+	//BGM再生
+	sound->playMusic(SOUND::RESULT_BGM);
+
 	//円柱の所属チームを確認
 	int blueNum = 0;
 	int redNum = 0;
@@ -85,7 +89,7 @@ void Result::background()
 		{
 			glPushMatrix();
 			{
-				glTranslatef(x * camera->right / poleNum, y * camera->top / poleNum, 0);
+				glTranslatef((2 - x) * camera->right / poleNum, y * camera->top / poleNum, 0);
 
 				const char poleCount = x + (y * 3);
 				if (pole[poleCount]->type == TYPE::BLUE)
@@ -175,9 +179,7 @@ void Result::pDelete()
 	delete camera;
 
 	pole.clear();
-
-	bgm->deleteMusic();
-	delete bgm;
+	sound->stopMusic(SOUND::RESULT_BGM);
 }
 
 
@@ -186,15 +188,11 @@ void Result::pDelete()
 ///////////////////////////
 bool Result::changeScene()
 {
-	static bool presEnter = false;
-
-	if (keys[0x0d] && presEnter == false)
+	
+	if (keys[0x0d] && prevkeys[0x0d] == false)
 	{
 		return true;
 	}
 
-	return false;
-
-	presEnter = keys[0x0d];
 }
 

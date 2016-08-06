@@ -6,8 +6,8 @@
 Texture *titleBackground;
 Texture *titleWord;
 Texture *titleNmae;
-WavFile *click;
 extern bool keys[256];
+extern bool prevkeys[256];
 
 
 ////////////////////////////////////
@@ -18,12 +18,8 @@ void Title::init()
 	//カメラ生成
 	camera = new Camera();
 
-	//bgm生成
-	bgm->playMusic(SOUND::TITLE_BGM);
-
-	//スペース押したときの音
-	click = new WavFile();
-	click->readSound("titleClick.wav",SOUND::CLICK);
+	//BGM再生
+	sound->playMusic(SOUND::TITLE_BGM);
 
 	//背景
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::TITLE_BACKGROUND]);
@@ -48,20 +44,17 @@ void Title::init()
 void Title::update()
 {
 	//クリック音が2秒以上になったら停止する
-	if (click->timeMusic(SOUND::CLICK) > 2.0f)
+	if (sound->timeMusic(SOUND::CLICK) > 2.0f)
 	{
-		click->stopMusic(SOUND::CLICK);
+		sound->stopMusic(SOUND::CLICK);
 	}
 
-	static bool presSpace = false;
-
-	//スペースを押したらシーン遷移する
-	if (keys[' '] && presSpace == false)
+	//エンターを押したらシーン遷移する
+	if (keys[0x0d] && prevkeys[0x0d] == false)
 	{
 		onChangeScene = true;
-		click->playMusic(SOUND::CLICK);
+		sound->playMusic(SOUND::CLICK);
 	}
-	presSpace = keys[0x0d];
 
 	//マスクを濃くするためアルファ値を増やす
 	if (onChangeScene)
@@ -88,7 +81,7 @@ void Title::draw()
 	mask();
 
 	//タイトル文字
-	word(TEXTURE_ID::TITLE_SPACE,glm::vec3(600,00,0));
+	word(TEXTURE_ID::TITLE_SPACE, glm::vec3(600, 00, 0));
 
 	//タイトル名
 	word(TEXTURE_ID::TITLE_NAME, glm::vec3(600, 2500, 0));
@@ -128,7 +121,7 @@ void Title::backGround()
 ////////////////////////////////////////////////
 //文字
 ////////////////////////////////////////////////
-void Title::word(int _textureID , glm::vec3 _translate)
+void Title::word(int _textureID, glm::vec3 _translate)
 {
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -199,12 +192,8 @@ void Title::pDelete()
 	delete titleBackground;
 	delete titleWord;
 
-	bgm->stopMusic(SOUND::TITLE_BGM);
-	//bgm->deleteMusic();
-	//delete bgm;
-	click->stopMusic(SOUND::CLICK);
-	click->deleteMusic();
-	delete click;
+	sound->stopMusic(SOUND::TITLE_BGM);
+	sound->stopMusic(SOUND::CLICK);
 }
 
 ////////////////////////////////
@@ -212,7 +201,6 @@ void Title::pDelete()
 ////////////////////////////////
 bool Title::changeScene()
 {
-
 	if (maskAlpha >= 0.9)
 	{
 		return true;

@@ -28,7 +28,7 @@ public:
 
 private:
 	char onCount;	//0Ç…Ç»ÇÈÇ∆è¡ñ≈
-	glm::vec3 color;
+	glm::vec3 color;//êF
 };
 
 extern std::list< DeadEffect* >deadEffect;

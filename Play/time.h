@@ -14,9 +14,9 @@ public:
 	}
 	~Time() {}
 
-	void update();
-	void draw();
-	int getMinutes();
+	void update();		//毎フレーム更新
+	void draw();		//描画
+	int getMinutes();	//今の時間を渡す
 
 private:
 	unsigned int frame;	//現在のフレーム数
