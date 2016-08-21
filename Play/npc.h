@@ -11,7 +11,9 @@ public:
 		maxHP(500),
 		HP(500),
 		attackCount(120),
-		stepCount(120)
+		stepCount(120),
+		isDeadTimer(0),
+		isDeathEffect(false)
 	{
 		pos = _pos;
 		lastPos = _pos;
@@ -42,8 +44,9 @@ public:
 	void poleCollision();		//‰~’Œ‚Æ‚ÌÕ“Ë”»’è
 	void NPCCollision(std::list< NPC* > _NPC);//NPC‚Æ‚ÌÕ“Ë”»’è
 
-	int HP;						//‘Ï‹v’l
-	unsigned int type;			//Š‘®w‰c
+	int HP;							//‘Ï‹v’l
+	unsigned int type;				//Š‘®w‰c
+	unsigned int isDeadTimer;		//€‚ñ‚Å‚©‚ç‚ÌŠÔ
 
 private:
 	void move(float _distance, unsigned int _onAttack);		//ˆÚ“®
@@ -57,6 +60,7 @@ private:
 	int attackCount;			//UŒ‚ŠÔŠu‚Ì‚½‚ß‚Ì•Ï”
 	int stepCount;				//‰ñ”ğs“®‚ÌŠÔŠu‚Ì‚½‚ß‚Ì•Ï”
 	unsigned int maxHP;			//Å‘å‘Ï‹v’l
+	bool isDeathEffect;			//€–SƒGƒtƒFƒNƒgƒtƒ‰ƒO
 };
 
 extern std::list< NPC* > enemy;

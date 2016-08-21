@@ -24,9 +24,16 @@ extern bool prevSpecialkey[256];
 ///////////////////////////////////
 void Player::update()
 {
-	move();
-	attack();
-	time->update();
+	if (isDead() == false)
+	{
+		move();
+		attack();
+	}
+	else
+	{
+		if (HP < 0) HP = 0;
+		isDeadTimer++;
+	}
 }
 
 ///////////////////////////////////
@@ -249,14 +256,20 @@ bool Player::isDead()
 {
 	if (HP <= 0)
 	{
-		//死亡エフェクト生成
-		for (int i = 0; i < 20; i++)
+		if (isDeathEffect == false)
 		{
-			DeadEffect* deadEffe = new DeadEffect(pos, color);
-			deadEffect.push_back(deadEffe);
+			//死亡エフェクト生成
+			for (int i = 0; i < 20; i++)
+			{
+				DeadEffect* deadEffe = new DeadEffect(pos, color);
+				deadEffect.push_back(deadEffe);
 
-			sound->playMusic(SOUND::ISDEAD);
+				sound->playMusic(SOUND::ISDEAD);
+			}
+
+			isDeathEffect = true;
 		}
+
 		return true;
 	}
 	else
@@ -271,8 +284,11 @@ bool Player::isDead()
 ///////////////////////////////////
 void Player::draw()
 {
-	bodyDraw();
-	trajectoryDraw();
+	if (isDead() == false)
+	{
+		bodyDraw();
+		trajectoryDraw();
+	}
 }
 
 /////////////////////////////////

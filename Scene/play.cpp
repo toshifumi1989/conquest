@@ -126,11 +126,16 @@ void Play::init()
 /////////////////////////
 void Play::update()
 {
+	//時計---------------------------------------------
+	time->update();
+
 	//キャラクター--------------------------------------
+	const int countRePop = 60 * 5; //5秒後に再復帰
 	//ブルー------------------------------
 	//プレイヤー
 	player->update();
-	if (player->isDead())
+
+	if (player->isDeadTimer >= countRePop)
 	{//HPが0を下回ったら
 		//いったん削除
 		delete player;
@@ -155,7 +160,8 @@ void Play::update()
 	while (supporterIter != supporter.end())
 	{
 		(*supporterIter)->update(enemy);
-		if ((*supporterIter)->isDead())
+
+		if ((*supporterIter)->isDeadTimer >= countRePop)
 		{
 			//HPが0を下回ったら削除
 			supporterIter = supporter.erase(supporterIter);
@@ -178,7 +184,7 @@ void Play::update()
 	{
 		(*enemyIter)->update(supporter);
 
-		if ((*enemyIter)->isDead())
+		if ((*enemyIter)->isDeadTimer >= countRePop)
 		{
 			//HPが0を下回ったら削除
 			enemyIter = enemy.erase(enemyIter);

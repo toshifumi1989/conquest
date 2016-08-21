@@ -17,7 +17,9 @@ public:
 		maxChargeGauge(50),
 		maxHP(500),
 		HP(500),
-		bulletTargetPoint(0,0,0)
+		bulletTargetPoint(0,0,0),
+		isDeadTimer(0),
+		isDeathEffect(false)
 	{
 		pos = _pos;
 		lastPos = _pos;
@@ -47,6 +49,7 @@ public:
 	bool isDead();					//true 死亡
 
 	int HP;							//耐久値
+	unsigned int isDeadTimer;		//死んでからの時間
 
 private:
 	void move();					//キャラクター移動
@@ -70,6 +73,8 @@ private:
 	const int maxChargeGauge;		//ショットゲージの最大値
 	const int maxHP;				//最大耐久値
 	glm::vec3 bulletTargetPoint;	//弾の終着点
+	bool isDeathEffect;				//死亡エフェクトフラグ
+
 };
 
 extern Player *player;

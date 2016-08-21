@@ -38,8 +38,17 @@ void NPC::update(std::list< NPC* >_NPC)
 	attackCount--;
 	stepCount--;
 
-	move(toTarget, onAttack);
-	attack(toTarget, onAttack);
+
+	if (isDead() == false)
+	{
+		move(toTarget, onAttack);
+		attack(toTarget, onAttack);
+	}
+	else
+	{
+		if (HP < 0) HP = 0;
+		isDeadTimer++;
+	}
 
 }
 
@@ -49,55 +58,58 @@ void NPC::update(std::list< NPC* >_NPC)
 ///////////////////////////
 void NPC::draw()
 {
-	glPushMatrix();
+	if (isDead() == false)
 	{
-		glEnable(GL_DEPTH_TEST);
-
-		//キャラクター-------------------------------------
-		const auto adjustBody = 0.5f;	//体のサイズのための位置調整
-
-		glColor3f(color.r, color.g, color.b);
-		glTranslatef(pos.x, pos.y + adjustBody, pos.z);
-		glRotatef(yaw, 0, 1, 0);
-
-		const auto divideNum = 20;	//分割数
-		glutSolidSphere(size, divideNum, divideNum);
-
-
-		//HPバー------------------------------------------
-		const auto height = 1;							//HPバーの高さ
-		const auto showHP = HP / 100.f;					//現在のHP
-		const auto showMaxHP = maxHP / 100.f;			//HPの最大
-		const auto posHeight = 2;					//HPバーの高さ
-
-		//ビルボード行列設定
-		glm::mat4 view;
-		glGetFloatv(GL_MODELVIEW_MATRIX, (float*)&view);
-
-		glm::mat4 m = glm::inverse(view);
-		m[3][0] = m[3][1] = m[3][2] = 0;
-		glMultMatrixf((float*)&m);
-
-		glTranslatef(-showMaxHP / 2.f, posHeight, 0);
-		glBegin(GL_QUADS);
+		glPushMatrix();
 		{
-			glColor3f(1, 1, 0);
-			glVertex3f(0, 0, 0);
-			glVertex3f(0, height, 0);
-			glVertex3f(showHP, height, 0);
-			glVertex3f(showHP, 0, 0);
+			glEnable(GL_DEPTH_TEST);
 
-			glColor3f(1, 1, 1);
-			glVertex3f(0, 0, 0);
-			glVertex3f(0, height, 0);
-			glVertex3f(showMaxHP, height, 0);
-			glVertex3f(showMaxHP, 0, 0);
+			//キャラクター-------------------------------------
+			const auto adjustBody = 0.5f;	//体のサイズのための位置調整
+
+			glColor3f(color.r, color.g, color.b);
+			glTranslatef(pos.x, pos.y + adjustBody, pos.z);
+			glRotatef(yaw, 0, 1, 0);
+
+			const auto divideNum = 20;	//分割数
+			glutSolidSphere(size, divideNum, divideNum);
+
+
+			//HPバー------------------------------------------
+			const auto height = 1;							//HPバーの高さ
+			const auto showHP = HP / 100.f;					//現在のHP
+			const auto showMaxHP = maxHP / 100.f;			//HPの最大
+			const auto posHeight = 2;					//HPバーの高さ
+
+														//ビルボード行列設定
+			glm::mat4 view;
+			glGetFloatv(GL_MODELVIEW_MATRIX, (float*)&view);
+
+			glm::mat4 m = glm::inverse(view);
+			m[3][0] = m[3][1] = m[3][2] = 0;
+			glMultMatrixf((float*)&m);
+
+			glTranslatef(-showMaxHP / 2.f, posHeight, 0);
+			glBegin(GL_QUADS);
+			{
+				glColor3f(1, 1, 0);
+				glVertex3f(0, 0, 0);
+				glVertex3f(0, height, 0);
+				glVertex3f(showHP, height, 0);
+				glVertex3f(showHP, 0, 0);
+
+				glColor3f(1, 1, 1);
+				glVertex3f(0, 0, 0);
+				glVertex3f(0, height, 0);
+				glVertex3f(showMaxHP, height, 0);
+				glVertex3f(showMaxHP, 0, 0);
+			}
+			glEnd();
+
+			glDisable(GL_DEPTH_TEST);
 		}
-		glEnd();
-
-		glDisable(GL_DEPTH_TEST);
+		glPopMatrix();
 	}
-	glPopMatrix();
 }
 
 /////////////////////////////////////
@@ -271,7 +283,7 @@ void NPC::attack(float _distance, unsigned int _onAttack)
 		if (_distance < _onAttack * _onAttack)
 		{
 
-			const float bulletYaw = yaw + (rand() % 30 - 15);
+			const float bulletYaw = yaw + (rand() % 20 - 10);
 			Bullet* subBullet = new Bullet(pos + correct, bulletYaw, type, damage);
 			bullet.push_back(subBullet);
 
@@ -382,14 +394,20 @@ bool NPC::isDead()
 {
 	if (HP <= 0)
 	{
-		//死亡エフェクト生成
-		for (int i = 0; i < 20; i++)
+		if (isDeathEffect == false)
 		{
-			DeadEffect* deadEffe = new DeadEffect(pos, color);
-			deadEffect.push_back(deadEffe);
+			//死亡エフェクト生成
+			for (int i = 0; i < 20; i++)
+			{
+				DeadEffect* deadEffe = new DeadEffect(pos, color);
+				deadEffect.push_back(deadEffe);
 
-			sound->playMusic(SOUND::ISDEAD);
+				sound->playMusic(SOUND::ISDEAD);
+			}
+
+			isDeathEffect = true;
 		}
+
 		return true;
 	}
 	else
