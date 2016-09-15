@@ -2,6 +2,8 @@
 #include "player.h"
 #include "field.h"
 #include "pole.h"
+#include "damageEffect.h"
+#include "wavFile.h"
 #include "../glut.h"
 #include "../glm/gtx/intersect.hpp"
 
@@ -57,6 +59,15 @@ bool Bullet::hitPlayer()
 		if (type != player->playerType())
 		{//所属が違うならダメージを受ける		
 			player->HP -= damageSize;
+
+			//ダメージエフェクト生成
+			for (int i = 0; i < 20; i++)
+			{
+				DamageEffect* damageEffe = new DamageEffect(pos);
+				damageEffect.push_back(damageEffe);
+
+				sound->playMusic(SOUND::ISDEAD);
+			}
 		}
 		return true;
 	}
@@ -87,6 +98,15 @@ bool Bullet::hitCharacter(std::list< NPC* > _character)
 			if (type != (*iter)->type)
 			{//所属が違うならダメージを受ける		
 				(*iter)->HP -= damageSize;
+
+				//ダメージエフェクト生成
+				for (int i = 0; i < 20; i++)
+				{
+					DamageEffect* damageEffe = new DamageEffect(pos);
+					damageEffect.push_back(damageEffe);
+
+					sound->playMusic(SOUND::ISDEAD);
+				}
 			}
 			return true;
 		}

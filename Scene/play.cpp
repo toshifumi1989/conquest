@@ -7,6 +7,7 @@
 #include "../Play/npc.h"
 #include "../Play/bullet.h"
 #include "../Play/pole.h"
+#include "../Play/damageEffect.h"
 #include "../Play/deadEffect.h"
 #include "../Play/time.h"
 #include "../Play/wavFile.h"
@@ -218,6 +219,20 @@ void Play::update()
 	}
 
 	//エフェクト----------------------------------
+	std::list< DamageEffect* >::iterator damageIter = damageEffect.begin();
+	while (damageIter != damageEffect.end())
+	{
+		(*damageIter)->update();
+		if ((*damageIter)->count() == 0)
+		{
+			damageIter = damageEffect.erase(damageIter);
+			continue;
+		}
+		damageIter++;
+	}
+
+
+
 	std::list< DeadEffect* >::iterator deadIter = deadEffect.begin();
 	while (deadIter != deadEffect.end())
 	{
@@ -287,6 +302,13 @@ void Play::draw()
 	}
 
 	//エフェクト----------------------------------
+	std::list< DamageEffect* >::iterator damageIter = damageEffect.begin();
+	while (damageIter != damageEffect.end())
+	{
+		(*damageIter)->draw();
+		damageIter++;
+	}
+
 	std::list< DeadEffect* >::iterator deadIter = deadEffect.begin();
 	while (deadIter != deadEffect.end())
 	{

@@ -40,12 +40,12 @@ void NPC::update(std::list< NPC* >_NPC)
 
 
 	if (isDead() == false)
-	{
+	{//死んでいなければ行動する
 		move(toTarget, onAttack);
 		attack(toTarget, onAttack);
 	}
 	else
-	{
+	{//死んでいたらカウントが増える
 		if (HP < 0) HP = 0;
 		isDeadTimer++;
 	}
