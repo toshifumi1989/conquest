@@ -5,6 +5,7 @@
 #include <Windows.h>
 
 GLuint textures[TEXTURE_ID::TEXTURE_MAX];
+Texture *smokeTex;
 
 ///////////////////////////////////////
 //テクスチャ読み込み
@@ -99,7 +100,7 @@ void Texture::read_alpha(const char* _texture)
 	//RGBをアルファに切り替え
 	for (int i = 0; i < bi.biWidth * bi.biHeight; i++)
 	{
-		const auto sub = (pixels[i].r + pixels[i].g + pixels[i].b) / 3;
+		const float sub = (pixels[i].r + pixels[i].g + pixels[i].b) / 3;
 		alpha.push_back(sub);
 	}
 

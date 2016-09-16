@@ -7,19 +7,19 @@
 
 enum TEXTURE_ID 
 {//読み込みテクスチャ番号
-	TITLE_BACKGROUND,
-	TITLE_SPACE,
-	TITLE_NAME,
+	TITLE_BACKGROUND,	//タイトル拝啓
+	TITLE_SPACE,		//タイトル操作文字
+	TITLE_NAME,			//タイトル名
 
-	FIELD,
-	WALL,
-	CONTROLLER,
-	SMOKEEFFECT,
+	FIELD,				//フィールド
+	WALL,				//壁
+	CONTROLLER,			//操作方法
+	SMOKEEFFECT,		//煙エフェクト用
 
-	VICTORYorDEFEAT,
-	RESULT_WORD,
+	VICTORYorDEFEAT,	//勝敗
+	RESULT_WORD,		//リザルト操作文字
 
-	TEXTURE_MAX,
+	TEXTURE_MAX,		//テクスチャ総枚数
 };
 
 class Texture
@@ -44,5 +44,6 @@ protected:
 };
 
 extern GLuint textures[TEXTURE_ID::TEXTURE_MAX];
+extern Texture *smokeTex;
 
 #endif

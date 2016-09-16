@@ -123,7 +123,7 @@ void NPC::move(float _distance, unsigned int _onAttack)
 		//ステップ可能になったら行動する
 		if (stepCount <= 0)
 		{
-			const float stepSpeed = 1.f;
+			const float stepSpeed = 0.8f;
 			if (rand() % 2 == 0)
 			{//左右に移動する(回避行動
 				speed.x += cos(yaw * M_PI / 180) * stepSpeed;
@@ -135,7 +135,7 @@ void NPC::move(float _distance, unsigned int _onAttack)
 				speed.z += sin(yaw * M_PI / 180) * stepSpeed;
 			}
 
-			stepCount = 30 + rand() % 40;//回避間隔の初期化(30～69
+			stepCount = 60 + rand() % 60;//回避間隔の初期化(1～2秒
 		}
 	}
 	else//攻撃できる距離まで移動する
@@ -168,7 +168,7 @@ void NPC::playerCollision()
 		(pos.x - player->pos.x) * (pos.x - player->pos.x)
 		+ (pos.z - player->pos.z) * (pos.z - player->pos.z);
 
-	if (distance < 2)
+	if (distance < 2 && player->HP > 0)
 	{
 		const auto miniDot = 0.2f;					//内積の最小値
 		const auto reflection = 0.2f;				//反発率
@@ -242,7 +242,7 @@ void NPC::NPCCollision(std::list< NPC* > _NPC)
 			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
 			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
 
-		if (distance < 2)
+		if (distance < 2 && (*iter)->HP > 0)
 		{
 			const auto miniDot = 0.2f;					//内積の最小値
 			const auto reflection = 0.2f;				//反発率
@@ -283,7 +283,7 @@ void NPC::attack(float _distance, unsigned int _onAttack)
 		if (_distance < _onAttack * _onAttack)
 		{
 
-			const float bulletYaw = yaw + (rand() % 20 - 10);
+			const float bulletYaw = yaw + (rand() % 10 - 5);
 			Bullet* subBullet = new Bullet(pos + correct, bulletYaw, type, damage);
 			bullet.push_back(subBullet);
 
@@ -306,15 +306,15 @@ glm::vec3 NPC::searchTarget()
 		//ポールがエネミー側以外のものに限定
 		if (!(pole[i]->type == type))
 		{
-			//ポールとエネミーの距離
-			const float enemyToPole =
+			//ポールとNPCの距離
+			const float npcToPole =
 				(pos.x - pole[i]->pos.x) * (pos.x - pole[i]->pos.x)
 				+ (pos.z - pole[i]->pos.z) * (pos.z - pole[i]->pos.z);
 
 			//今までのポールより近ければ保存
-			if (enemyToPole < mostNearPoleDistance)
+			if (npcToPole < mostNearPoleDistance)
 			{
-				mostNearPoleDistance = enemyToPole;
+				mostNearPoleDistance = npcToPole;
 				poleID = i;
 			}
 		}
@@ -348,7 +348,8 @@ glm::vec3 NPC::enemyTarget(std::list< NPC* > _npc)
 			(pos.x - player->pos.x) * (pos.x - player->pos.x)
 			+ (pos.z - player->pos.z) * (pos.z - player->pos.z);
 
-		if (mostNearDistance > toPlayerDistance)
+		if (mostNearDistance > toPlayerDistance //元々のターゲットより近いか
+			&& player->HP > 0)
 		{
 			mostNearDistance = toPlayerDistance;
 			targetPos = player->pos;
@@ -364,7 +365,8 @@ glm::vec3 NPC::enemyTarget(std::list< NPC* > _npc)
 			(pos.x - (*iter)->pos.x) * (pos.x - (*iter)->pos.x)
 			+ (pos.z - (*iter)->pos.z) * (pos.z - (*iter)->pos.z);
 
-		if (mostNearDistance > toNPCDistance)
+		if (mostNearDistance > toNPCDistance  //元々のターゲットより近いか
+			&& (*iter)->HP > 0)
 		{
 			mostNearDistance = toNPCDistance;
 			targetPos = (*iter)->pos;
@@ -397,17 +399,11 @@ bool NPC::isDead()
 		if (isDeathEffect == false)
 		{
 			//死亡エフェクト生成
-			for (int i = 0; i < 20; i++)
-			{
-				DeadEffect* deadEffe = new DeadEffect(pos, color);
-				deadEffect.push_back(deadEffe);
-
-				sound->playMusic(SOUND::ISDEAD);
-			}
+			DeadEffect *deadEfe = new DeadEffect(pos);
+			deadEffect.push_back(deadEfe);
 
 			isDeathEffect = true;
 		}
-
 		return true;
 	}
 	else

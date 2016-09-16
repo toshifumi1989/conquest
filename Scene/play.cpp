@@ -35,20 +35,21 @@ void Play::init()
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::WALL]);
 
 	Wall *northWall = new Wall(glm::vec3(field->center.x, 0, field->center.z + fieldToDistance), 0);	//z+120の壁
-	northWall->read("wall.bmp");
-	wall.push_back(northWall);
-
 	Wall *southWall = new Wall(glm::vec3(field->center.x, 0, field->center.z - fieldToDistance), 0);	//z-120の壁
-	southWall->read("wall.bmp");
-	wall.push_back(southWall);
-
 	Wall *eastWall = new Wall(glm::vec3(field->center.x + fieldToDistance, 0, field->center.z), 90);	//x+120の壁
-	eastWall->read("wall.bmp");
-	wall.push_back(eastWall);
-
 	Wall *westWall = new Wall(glm::vec3(field->center.x - fieldToDistance, 0, field->center.z), 90);	//z-120の壁
-	westWall->read("wall.bmp");
+
+	northWall->read("wall.bmp");	//壁テクスチャ読み込み
+
+	wall.push_back(northWall);
+	wall.push_back(southWall);
+	wall.push_back(eastWall);
 	wall.push_back(westWall);
+
+	//スモークテクスチャ-------------------------------------------------
+	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_ID::SMOKEEFFECT]);
+	smokeTex = new Texture();
+	smokeTex->read_alpha("smoke.bmp");
 
 	//ポール--------------------------------------------------------------------------------
 	const char poleNum = 3;	//poleの数(pole * pole)
@@ -223,26 +224,16 @@ void Play::update()
 	while (damageIter != damageEffect.end())
 	{
 		(*damageIter)->update();
-		if ((*damageIter)->count() == 0)
-		{
-			damageIter = damageEffect.erase(damageIter);
-			continue;
-		}
-		damageIter++;
+		if ((*damageIter)->count() == 0) damageIter = damageEffect.erase(damageIter);
+		else damageIter++;
 	}
-
-
 
 	std::list< DeadEffect* >::iterator deadIter = deadEffect.begin();
 	while (deadIter != deadEffect.end())
 	{
 		(*deadIter)->update();
-		if ((*deadIter)->count() == 0)
-		{
-			deadIter = deadEffect.erase(deadIter);
-			continue;
-		}
-		deadIter++;
+		if ((*deadIter)->del()) deadIter = deadEffect.erase(deadIter);
+		else deadIter++;
 	}
 
 
@@ -273,6 +264,21 @@ void Play::draw()
 
 	//カメラ設定--------------------------------------
 	camera->draw();
+
+	//フィールド（地面描画--------------------------
+	field->draw();
+
+	//壁描画----------------------------------------
+	for (int i = 0; i < wall.size(); i++)
+	{
+		wall[i]->draw(TEXTURE_ID::WALL);
+	}
+
+	//円柱------------------------------------------
+	for (int i = 0; i < pole.size(); i++)
+	{
+		pole[i]->draw();
+	}
 
 	//キャラクター-------------------------------------
 	//プレイヤー
@@ -315,20 +321,6 @@ void Play::draw()
 		(*deadIter)->draw();
 		deadIter++;
 	}
-	//フィールド（地面描画--------------------------
-	field->draw();
-
-	//壁描画----------------------------------------
-	for (int i = 0; i < wall.size(); i++)
-	{
-		wall[i]->draw(TEXTURE_ID::WALL);
-	}
-
-	//円柱------------------------------------------
-	for (int i = 0; i < pole.size(); i++)
-	{
-		pole[i]->draw();
-	}
 
 	//HUD-------------------------------------------
 	HUD();
@@ -357,6 +349,7 @@ void Play::pDelete()
 	delete controller;
 	delete field;
 	delete time;
+	delete smokeTex;
 
 	wall.clear();
 	enemy.clear();

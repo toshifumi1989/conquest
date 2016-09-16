@@ -259,17 +259,11 @@ bool Player::isDead()
 		if (isDeathEffect == false)
 		{
 			//死亡エフェクト生成
-			for (int i = 0; i < 20; i++)
-			{
-				DeadEffect* deadEffe = new DeadEffect(pos, color);
-				deadEffect.push_back(deadEffe);
-
-				sound->playMusic(SOUND::ISDEAD);
-			}
+			DeadEffect* deadEffe = new DeadEffect(pos);
+			deadEffect.push_back(deadEffe);
 
 			isDeathEffect = true;
 		}
-
 		return true;
 	}
 	else
@@ -477,7 +471,7 @@ void Player::control()
 	glColor4f(1, 1, 1, 1);
 	glPushMatrix();
 	{
-		glTranslatef(500,300, 0);
+		glTranslatef(500, 300, 0);
 		glBegin(GL_QUADS);
 		{
 			glTexCoord2d(0, 1);

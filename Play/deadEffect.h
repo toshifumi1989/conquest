@@ -3,16 +3,23 @@
 
 #include <list>
 #include "../glm/glm.hpp"
-#include "effect.h"
+#include "textureEffect.h"
 
-class DeadEffect : public GameObject {
+class DeadEffect : public GameObject 
+{
 public:
+	DeadEffect(){}
+	DeadEffect(glm::vec3 _pos){init(_pos);}
+	~DeadEffect(){}
 
-	std::list< Effect* > smoke;
-	std::list< Effect* > fire;
+	void init(glm::vec3 _pos);
+	void update();
+	void draw();
+	bool del();
 
-	void init();
-
+private:
+	std::list< TextureEffect > smoke;
+	std::list< TextureEffect > fire;
 };
 
 extern std::list< DeadEffect* > deadEffect;

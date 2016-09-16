@@ -98,7 +98,6 @@ void display(void)
 		prevSpecialkey[i] = specialKey[i];
 	}
 
-	printf("key[ %d  :  %d ]\n",keys[0x0d] ,prevkeys[0x0d]);
 	glFlush();
 }
 
